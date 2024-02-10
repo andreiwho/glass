@@ -4,14 +4,24 @@
 
 namespace gp = glass::platform;
 
+void onMouseMove(const gp::MouseMoveEvent& event) {
+    std::println("Mouse moved: {}, {}", event.X, event.Y);
+}
+
 void onWindowEvent(const gp::WindowEvent& event) {
-    std::println("{}", event.toString());
+    gp::EventDispatcher disp(event);
+    disp.dispatch(&onMouseMove);
 }
 
 int main() {
     assert(gp::init());
+    gp::WindowSpec spec{};
+    
+    spec.Size = { 1280, 720 };
+    spec.Title = "Hello, Glass";
+    spec.EventCallback = onWindowEvent;
 
-    gp::Window* window = gp::createWindow({ { 1280, 720 }, "Hello Glass", nullptr, onWindowEvent });
+    gp::Window* window = gp::createWindow(spec);
     while (gp::isMainWindowAlive()) {
         gp::pollEvents();
     }

@@ -500,6 +500,27 @@ namespace glass {
             static constexpr EWindowEventType getStaticType() { return EWindowEventType::KeyTypeChar; }
         };
 
+        struct EventDispatcher {
+            const WindowEvent& Event;
+
+            inline explicit EventDispatcher(const WindowEvent& event)
+                : Event(event) {}
+
+            template<typename EventType>
+            void dispatch(void (*callback)(const EventType&)) {
+                if (EventType::getStaticType() == Event.Type) {
+                    callback(static_cast<const EventType&>(Event));
+                }
+            }
+
+            template<typename EventType, typename HandlerType>
+            void dispatch(HandlerType* handler, void (HandlerType::* callback)(const EventType&)) {
+                if (EventType::getStaticType() == Event.Type) {
+                    (handler->*callback)(static_cast<const EventType&>(Event));
+                }
+            }
+        };
+
         /**
          * @brief Creates a platform window (this is a GLFWwindow wrapper for a little bit of simplification)
          * @return A valid handle to a window

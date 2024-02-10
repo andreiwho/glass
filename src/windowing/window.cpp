@@ -64,6 +64,7 @@ namespace glass::platform {
 
             event.EventWindow = myWindow;
             event.NewSize = { w, h };
+            event.Type = EWindowEventType::WindowResize;
 
             myWindow->executeCallback(event);
         });
@@ -75,6 +76,7 @@ namespace glass::platform {
             event.EventWindow = myWindow;
             event.PosX = x;
             event.PosY = y;
+            event.Type = EWindowEventType::WindowMove;
 
             myWindow->executeCallback(event);
         });
@@ -85,10 +87,12 @@ namespace glass::platform {
             if (maximized) {
                 WindowMaximizeEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::WindowMaximize;
                 myWindow->executeCallback(event);
             } else {
                 WindowRestoreEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::WindowRestore;
                 myWindow->executeCallback(event);
             }
         });
@@ -99,10 +103,12 @@ namespace glass::platform {
             if (iconified) {
                 WindowMinimizeEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::WindowMinimize;
                 myWindow->executeCallback(event);
             } else {
                 WindowRestoreEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::WindowRestore;
                 myWindow->executeCallback(event);
             }
         });
@@ -113,10 +119,12 @@ namespace glass::platform {
             if (focused) {
                 WindowFocusEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::WindowFocus;
                 myWindow->executeCallback(event);
             } else {
                 WindowUnfocusEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::WindowUnfocus;
                 myWindow->executeCallback(event);
             }
         });
@@ -127,10 +135,12 @@ namespace glass::platform {
             if (entered) {
                 MouseEnterWindowEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::MouseEnterWindow;
                 myWindow->executeCallback(event);
             } else {
                 MouseLeaveWindowEvent event{};
                 event.EventWindow = myWindow;
+                event.Type = EWindowEventType::MouseLeaveWindow;
                 myWindow->executeCallback(event);
             }
         });
@@ -142,6 +152,7 @@ namespace glass::platform {
             event.EventWindow = myWindow;
             event.X = x;
             event.Y = y;
+            event.Type = EWindowEventType::MouseMove;
 
             myWindow->executeCallback(event);
         });
@@ -152,11 +163,13 @@ namespace glass::platform {
                 MouseButtonPressEvent event{};
                 event.EventWindow = myWindow;
                 event.Button = static_cast<EMouseButton>(button);
+                event.Type = EWindowEventType::MouseButtonPress;
                 myWindow->executeCallback(event);
             } else {
                 MouseButtonReleaseEvent event{};
                 event.EventWindow = myWindow;
                 event.Button = static_cast<EMouseButton>(button);
+                event.Type = EWindowEventType::MouseButtonRelease;
                 myWindow->executeCallback(event);
             }
         });
@@ -168,18 +181,21 @@ namespace glass::platform {
                 case GLFW_PRESS: {
                     KeyPressEvent event{};
                     event.EventWindow = myWindow;
+                    event.Type = EWindowEventType::KeyPress;
                     event.KeyCode = static_cast<EKeyCode>(key);
                     myWindow->executeCallback(event);
                 } break;
                 case GLFW_RELEASE: {
                     KeyReleaseEvent event{};
                     event.EventWindow = myWindow;
+                    event.Type = EWindowEventType::KeyRelease;
                     event.KeyCode = static_cast<EKeyCode>(key);
                     myWindow->executeCallback(event);
                 } break;
                 case GLFW_REPEAT: {
                     KeyRepeatEvent event;
                     event.EventWindow = myWindow;
+                    event.Type = EWindowEventType::KeyRepeat;
                     event.KeyCode = static_cast<EKeyCode>(key);
                     myWindow->executeCallback(event);
                 }
@@ -191,6 +207,7 @@ namespace glass::platform {
             KeyTypeCharEvent event{};
             event.EventWindow = myWindow;
             event.Char = character;
+            event.Type = EWindowEventType::KeyTypeChar;
             myWindow->executeCallback(event);
         });
 
@@ -209,6 +226,7 @@ namespace glass::platform {
 
             WindowCloseEvent event{};
             event.EventWindow = myWindow;
+            event.Type = EWindowEventType::WindowClose;
 
             myWindow->executeCallback(event);
 
