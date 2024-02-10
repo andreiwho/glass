@@ -8,9 +8,14 @@ void onMouseMove(const gp::MouseMoveEvent& event) {
     std::println("Mouse moved: {}, {}", event.X, event.Y);
 }
 
+void onKeyPress(const gp::KeyPressEvent& event) {
+    std::println("Key pressed: {}", gp::toString(event.KeyCode));
+}
+
 void onWindowEvent(const gp::WindowEvent& event) {
     gp::EventDispatcher disp(event);
     disp.dispatch(&onMouseMove);
+    disp.dispatch(&onKeyPress);
 }
 
 int main() {
