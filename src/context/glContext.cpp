@@ -78,6 +78,10 @@ namespace glass::gfx {
         }
 
         void destroyContext(const Context* context) {
+            if (!context) {
+                return;
+            }
+
             auto window = context->getWindow();
             if (Contexts.contains(window)) {
                 Contexts.erase(window);

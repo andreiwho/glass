@@ -567,7 +567,6 @@ namespace glass {
     } // namespace platform
 
     namespace gfx {
-
         struct ContextSpec {
             /** Window to create the context for */
             const platform::Window* ContextWindow;
@@ -608,5 +607,84 @@ namespace glass {
          * @brief Swap context buffers.
          */
         GLASS_API void present(const Context* context);
+
+        /**
+         * Resources API
+         */
+
+        /** How the buffer is going to be used */
+        enum EBufferUsage {
+            /** The buffer will be used for drawing */
+            EBU_Draw,
+
+            /** The buffer will be used for copying data to other resources. */
+            EBU_Copy,
+
+            /** The buffer will be using for readback from GPU. */
+            EBU_Read,
+        };
+
+        /** How often the buffer is going to be updated */
+        enum EBufferMutability {
+            /** Buffer contents are going to be assigned once and never or rarely updated. */
+            EBM_Static,
+
+            /** Buffer contents are going to be updated frequently (e.g. once per frame) */
+            EBM_Dynamic,
+
+            /** Buffer is created for data streaming and will be updated rarely or never. */
+            EBM_Stream,
+        };
+
+        /** What type of buffer this is */
+        enum EBufferType {
+            /** Invalid case */
+            EBT_Unknown,
+
+            /** The buffer is a vertex buffer */
+            EBT_Vertex,
+
+            /** The buffer is an index buffer */
+            EBT_Element,
+
+            /** The buffer is a uniform buffer */
+            EBT_Uniform,
+
+            /** The buffer is a storage buffer */
+            EBT_Storage,
+        };
+
+        /** Buffer input element. */
+        struct BufferInputElement {
+
+        };
+
+        /** Buffer input layout */
+        class BufferInputLayout {
+
+        };
+
+        /** Specification of the buffer */
+        struct BufferSpec {
+            /** The size of allocated memory for buffer (in bytes) */
+            uint32_t SizeInBytes{};
+
+            /** The size of a single element of the buffer (e.g. Vertex size for vertex buffer or element size for storage buffer) */
+            uint32_t StrideInBytes{};
+
+            /** How the buffer is going to be used. */
+            EBufferUsage Usage{ EBU_Draw };
+
+            /** How often the buffer is going to be modified */
+            EBufferMutability Mutability{ EBM_Static };
+
+            /** What kind of buffer this is. */
+            EBufferType BufferType{ EBT_Unknown };
+
+            /** Used for vertex buffer. The vertex input layout. */
+            const BufferInputLayout* InputLayout{};
+        };
+
+
     } // namespace gfx
 } // namespace glass
