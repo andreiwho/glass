@@ -654,14 +654,34 @@ namespace glass {
             EBT_Storage,
         };
 
+        /** Value type */
+        enum EValueType {
+            EVT_Float,
+            EVT_Int,
+            EVT_UInt,
+        };
+
+        enum EBufferDataRate {
+            EBDR_PerVertex,
+            EBDR_PerInstance,
+        };
+
         /** Buffer input element. */
         struct BufferInputElement {
-
+            EValueType Type{};
+            uint32_t Count{};
+            uint64_t Offset{};
+            EBufferDataRate DataRate{EBDR_PerVertex};
         };
 
         /** Buffer input layout */
         class BufferInputLayout {
+        public:
+            constexpr BufferInputLayout& add(EValueType type, uint32_t componentCount, uint64_t offset, EBufferDataRate dataRate = EBDR_PerVertex);
+            constexpr const std::vector<BufferInputElement>& getElements() const { return m_Elements; }
 
+        private:
+            std::vector<BufferInputElement> m_Elements{};
         };
 
         /** Specification of the buffer */
@@ -684,7 +704,6 @@ namespace glass {
             /** Used for vertex buffer. The vertex input layout. */
             const BufferInputLayout* InputLayout{};
         };
-
 
     } // namespace gfx
 } // namespace glass
