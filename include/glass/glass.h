@@ -567,25 +567,46 @@ namespace glass {
     } // namespace platform
 
     namespace gfx {
-        GLASS_API void init();
-        GLASS_API void shutdown();
 
         struct ContextSpec {
+            /** Window to create the context for */
             const platform::Window* ContextWindow;
 
+            /** Should vertical sync be enabled */
             bool EnableVSync{};
         };
 
+        /** Graphics context. This holds a window and manages context resources. */
         class Context;
 
+        /**
+         * @brief Create a graphics context handle.
+         * @param spec The specification of the graphics context
+         * @return OpenGL context handle.
+         */
         GLASS_API Context* createContext(const ContextSpec& spec);
 
+        /**
+         * @brief Destroy graphics context and uninitialize it's resources.
+         * @param context A graphics context handle. Can be null.
+         */
         GLASS_API void destroyContext(const Context* context);
 
+        /**
+         * @brief Get associated context by window handle.
+         * @return A valid context handle if context for the window exists.
+         */
         GLASS_API Context* getContextForWindow(const platform::Window* window);
 
+        /**
+         * @brief Set the context to be the main context for drawing and graphics operations
+         * @param context A graphics context handle
+         */
         GLASS_API void makeContextCurrent(const Context* context);
 
+        /**
+         * @brief Swap context buffers.
+         */
         GLASS_API void present(const Context* context);
     } // namespace gfx
 } // namespace glass
