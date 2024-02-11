@@ -37,7 +37,7 @@ namespace glass {
         /**
          * @brief Poll platform events.
          */
-        GLASS_API void pollEvents();
+        GLASS_API bool pollEvents();
 
         class Window;
 
@@ -506,15 +506,15 @@ namespace glass {
             inline explicit EventDispatcher(const WindowEvent& event)
                 : Event(event) {}
 
-            template<typename EventType>
+            template <typename EventType>
             void dispatch(void (*callback)(const EventType&)) {
                 if (EventType::getStaticType() == Event.Type) {
                     callback(static_cast<const EventType&>(Event));
                 }
             }
 
-            template<typename EventType, typename HandlerType>
-            void dispatch(HandlerType* handler, void (HandlerType::* callback)(const EventType&)) {
+            template <typename EventType, typename HandlerType>
+            void dispatch(HandlerType* handler, void (HandlerType::*callback)(const EventType&)) {
                 if (EventType::getStaticType() == Event.Type) {
                     (handler->*callback)(static_cast<const EventType&>(Event));
                 }
@@ -555,9 +555,37 @@ namespace glass {
         GLASS_API bool isMainWindowAlive();
 
         /**
+         * @brief Checks if there are any windows alive
+         */
+        GLASS_API bool isAnyWindowAlive();
+
+        /**
          * @brief Sets new event callback
          */
         GLASS_API void setWindowEventCallback(Window* window, GLASS_PFN_WindowEventCallback callback);
 
     } // namespace platform
+
+    namespace gfx {
+        GLASS_API void init();
+        GLASS_API void shutdown();
+
+        struct ContextSpec {
+            const platform::Window* ContextWindow;
+
+            bool EnableVSync{};
+        };
+
+        class Context;
+
+        GLASS_API Context* createContext(const ContextSpec& spec);
+
+        GLASS_API void destroyContext(const Context* context);
+
+        GLASS_API Context* getContextForWindow(const platform::Window* window);
+
+        GLASS_API void makeContextCurrent(const Context* context);
+
+        GLASS_API void present(const Context* context);
+    } // namespace gfx
 } // namespace glass

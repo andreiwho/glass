@@ -3,6 +3,7 @@
 #include "print"
 
 namespace gp = glass::platform;
+namespace gfx = glass::gfx;
 
 void onMouseMove(const gp::MouseMoveEvent& event) {
     std::println("Mouse moved: {}, {}", event.X, event.Y);
@@ -27,9 +28,11 @@ int main() {
     spec.EventCallback = onWindowEvent;
 
     gp::Window* window = gp::createWindow(spec);
-    while (gp::isMainWindowAlive()) {
-        gp::pollEvents();
+    gfx::Context* context = gfx::createContext({ window });
+
+    while (gp::pollEvents()) {
+        gfx::present(context);
     }
 
-    glass::platform::shutdown();
+    gp::shutdown();
 }

@@ -7,6 +7,10 @@ namespace glass::platform {
     Window::Window(const WindowSpec& spec, bool isMain)
         : m_Spec(spec)
         , m_IsMain(isMain) {
+#ifndef NDEBUG
+        glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
+#endif
+
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GLASS_CONTEXT_VERSION_MAJOR);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GLASS_CONTEXT_VERSION_MINOR);
         glfwWindowHint(GLFW_RESIZABLE, spec.Resizable ? GLFW_TRUE : GLFW_FALSE);

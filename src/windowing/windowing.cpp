@@ -39,8 +39,14 @@ namespace glass::platform {
         glfwTerminate();
     }
 
-    void pollEvents() {
+    bool pollEvents() {
         glfwPollEvents();
+
+        if (!isAnyWindowAlive()) {
+            return false;
+        }
+
+        return true;
     }
 
     Window* createWindow(const WindowSpec& spec) {
@@ -76,6 +82,10 @@ namespace glass::platform {
 
     bool isMainWindowAlive() {
         return !GPlatformInfo->Windows.empty() && GPlatformInfo->Windows.at(0)->isMain();
+    }
+
+    bool isAnyWindowAlive() {
+        return !GPlatformInfo->Windows.empty();
     }
 
     void setWindowEventCallback(Window* window, GLASS_PFN_WindowEventCallback callback) {
