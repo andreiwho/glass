@@ -161,5 +161,51 @@ namespace glass::gfx {
     void makeContextCurrent(const Context* context) {
         glfwMakeContextCurrent(context->getWindow()->getHandle());
     }
+    
+    void draw(EPrimitiveTopology topology, uint32_t vertexCount, uint32_t firstVertex) {
+        GLenum glTop{};
+        switch (topology) {
+            case EPT_Triangles:
+                glTop = GL_TRIANGLES;
+                break;
+            case EPT_Lines:
+                glTop = GL_LINES;
+                break;
+            case EPT_Points:
+                glTop = GL_POINTS;
+                break;
+        }
+
+        glDrawArrays(glTop, static_cast<GLint>(firstVertex), static_cast<GLsizei>(vertexCount));
+    }
+
+    void drawElements(EPrimitiveTopology topology, uint32_t indexCount, EIndexType indexType) {
+        GLenum glTop{};
+        switch (topology) {
+            case EPT_Triangles:
+                glTop = GL_TRIANGLES;
+                break;
+            case EPT_Lines:
+                glTop = GL_LINES;
+                break;
+            case EPT_Points:
+                glTop = GL_POINTS;
+                break;
+        }
+
+        GLenum glIndexType{};
+        switch (indexType) {
+            case EIT_UInt16:
+                glIndexType = GL_UNSIGNED_INT;
+                break;
+            case EIT_UInt32:
+                glIndexType = GL_UNSIGNED_SHORT;
+                break;
+            default:
+                break;
+        }
+
+        glDrawElements(glTop, static_cast<GLsizei>(indexCount), glIndexType, nullptr);
+    }
 
 } // namespace glass::gfx
