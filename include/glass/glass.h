@@ -630,6 +630,42 @@ namespace glass {
          */
         GLASS_API void makeContextCurrent(const Context* context);
 
+        enum EClearFlags {
+            ECF_Color = 1 << 0,
+            ECF_Depth = 1 << 1,
+            ECF_Stencil = 1 << 2,
+            ECF_DepthStencil = ECF_Depth | ECF_Stencil,
+            ECF_All = ECF_Color | ECF_DepthStencil,
+        };
+        using EClearFlagsMask = uint32_t;
+
+        /**
+         * @brief Clear context viewport.
+         * @param clearFlags A valid mask of EClearFlags components (e.g. ECF_Color | ECF_Depth)
+         * @param clearColor A color to use for clearing the buffer. May be null.
+         */
+        GLASS_API void clearViewport(EClearFlagsMask clearFlags, const glm::vec4* clearColor = nullptr);
+
+        /** Viewport struct to determin draw area. */
+        struct Viewport2D {
+            /** Top left corner X of draw area */
+            int32_t X{0};
+
+            /** Top left corner Y of draw area */
+            int32_t Y{0};
+
+            /** Width of draw area. Leave at 0 to deduce from window */
+            int32_t Width{0};
+
+            /** Height of draw area. Leave at 0 to deduce from window */
+            int32_t Height{0};
+        };
+
+        /**
+         * @brief Set viewport data
+         */
+        GLASS_API void setViewport(const Viewport2D& viewport = {});
+
         /**
          * @brief Swap context buffers.
          */

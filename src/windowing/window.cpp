@@ -35,7 +35,7 @@ namespace glass::platform {
         if (spec.EventCallback) {
             setEventCallback(spec.EventCallback);
         } else {
-            setCloseCallback();
+            setEventCallback([](const WindowEvent&) {});
         }
 
         glfwSetWindowUserPointer(m_Window, this);
@@ -74,6 +74,7 @@ namespace glass::platform {
             event.NewSize = { w, h };
             event.Type = EWindowEventType::WindowResize;
 
+            myWindow->m_Spec.Size = event.NewSize;
             myWindow->executeCallback(event);
         });
 
@@ -168,7 +169,6 @@ namespace glass::platform {
         });
 
         glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int) {
-
             auto myWindow = getWindow(window);
             if (action == GLFW_PRESS) {
                 MouseButtonPressEvent event{};
@@ -230,9 +230,7 @@ namespace glass::platform {
     }
 
     void Window::executeCallback(const WindowEvent& event) {
-        if (m_Spec.EventCallback) {
-            m_Spec.EventCallback(event);
-        }
+        m_Spec.EventCallback(event);
     }
 
     void Window::setCloseCallback() {

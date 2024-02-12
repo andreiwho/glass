@@ -8,18 +8,6 @@
 namespace gp = glass::platform;
 namespace gfx = glass::gfx;
 
-void onMouseMove(const gp::MouseMoveEvent& event) {
-    std::println("Mouse moved: {}, {}", event.X, event.Y);
-}
-
-void onKeyPress(const gp::KeyPressEvent& event) {
-    std::println("Key pressed: {}", gp::toString(event.KeyCode));
-}
-
-void onWindowEvent(const gp::WindowEvent& event) {
-    std::println("{}", event.toString());
-}
-
 struct Vertex {
     glm::vec3 pos;
     glm::vec2 uv;
@@ -31,7 +19,6 @@ int main() {
 
     spec.Size = { 1280, 720 };
     spec.Title = "Hello, Glass";
-    spec.EventCallback = onWindowEvent;
     spec.Resizable = true;
 
     gp::Window* window = gp::createWindow(spec);
@@ -40,10 +27,10 @@ int main() {
     gfx::ResourceID vbo{};
     {
         Vertex vertices[] = {
-            { { -0.5f, +0.5f, 0.0f }, { 0.0f, 1.0f } },
-            { { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f } },
-            { { +0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f } },
-            { { +0.5f, +0.5f, 0.0f }, { 1.0f, 1.0f } }
+            { { -0.5f, +0.5f, -3.0f }, { 0.0f, 1.0f } },
+            { { -0.5f, -0.5f, -3.0f }, { 0.0f, 0.0f } },
+            { { +0.5f, -0.5f, -3.0f }, { 1.0f, 0.0f } },
+            { { +0.5f, +0.5f, -3.0f }, { 1.0f, 1.0f } }
         };
 
         gfx::BufferInputLayout layout{};
@@ -83,12 +70,21 @@ int main() {
     gfx::ResourceID texture = gfx::createTexture(textureSpec);
 
     while (gp::pollEvents()) {
+        glm::vec4 clearColor{ 0.2f, 0.31f, 0.12f, 1.0f };
+        gfx::clearViewport(gfx::ECF_All, &clearColor);
+        gfx::setViewport();
+
 
         gfx::bindVertexBuffer(vbo);
         gfx::bindElementBuffer(ibo);
 
         gfx::bindShaderProgram(program);
         gfx::setUniformTexture(program, "uTexture", texture);
+        
+        // Set projection matrix
+        const gp::WindowSize size = gp::getWindowSize(window);
+        gfx::setUniform(program, "uProjection", 
+            glm::perspectiveFov(glm::radians(45.0f), (float)size.Width, (float)size.Height, 0.1f, 100.0f));
 
         gfx::drawElements(gfx::EPT_Triangles, 6);
         gfx::present(context);

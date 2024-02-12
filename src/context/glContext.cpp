@@ -8,6 +8,7 @@
 #include "glShader.h"
 
 namespace glass::gfx {
+    const Context* GCurrentContext = nullptr;
 
     static void glDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
         std::string_view messageSource{};
@@ -151,6 +152,40 @@ namespace glass::gfx {
     Context::~Context() {
     }
 
+    void clearViewport(EClearFlagsMask clearFlags, const glm::vec4* clearColor) {
+        if (clearColor) {
+            glClearColor(clearColor->r, clearColor->g, clearColor->b, clearColor->a);
+        }
+
+        GLuint flags{};
+        if (clearFlags & ECF_Color) {
+            flags |= GL_COLOR_BUFFER_BIT;
+        }
+        if (clearFlags & ECF_Depth) {
+            flags |= GL_DEPTH_BUFFER_BIT;
+        }
+        if (clearFlags & ECF_Stencil) {
+            flags |= GL_STENCIL_BUFFER_BIT;
+        }
+
+        glClear(flags);
+    }
+
+    void setViewport(const Viewport2D& viewport) {
+        if (viewport.Width > 0 && viewport.Height > 0) {
+            glViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height);
+            return;
+        } else {
+            if (!GCurrentContext) {
+                return;
+            }
+            
+            const platform::WindowSize windowSize = platform::getWindowSize(GCurrentContext->getWindow());
+            Viewport2D vp = { viewport.X, viewport.Y, windowSize.Width, windowSize.Height };
+            glViewport(vp.X, vp.Y, windowSize.Width, windowSize.Height);
+        }
+    }
+
     void Context::present() {
         glfwSwapInterval(m_VSyncEnabled ? 1 : 0);
         glfwSwapBuffers(m_Window->getHandle());
@@ -162,8 +197,9 @@ namespace glass::gfx {
 
     void makeContextCurrent(const Context* context) {
         glfwMakeContextCurrent(context->getWindow()->getHandle());
+        GCurrentContext = context;
     }
-    
+
     void draw(EPrimitiveTopology topology, uint32_t vertexCount, uint32_t firstVertex) {
         GLenum glTop{};
         switch (topology) {
