@@ -59,6 +59,10 @@ namespace glass::platform {
         return static_cast<Window*>(glfwGetWindowUserPointer(window));
     }
 
+    extern void internal_onMouseButtonState(EMouseButton button, bool state);
+    extern void internal_onKeyState(EKeyCode key, bool state);
+    extern void internal_onMouseMove(double x, double y);
+
     void Window::setEventCallback(GLASS_PFN_WindowEventCallback callback) {
         m_Spec.EventCallback = callback;
 
@@ -160,12 +164,10 @@ namespace glass::platform {
 
             myWindow->executeCallback(event);
 
-            extern void internal_onMouseMove(double x, double y);
             internal_onMouseMove(x, y);
         });
 
         glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int) {
-            extern void internal_onMouseButtonState(EMouseButton button, bool state);
 
             auto myWindow = getWindow(window);
             if (action == GLFW_PRESS) {
@@ -187,7 +189,6 @@ namespace glass::platform {
 
         glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int, int action, int) {
             auto myWindow = getWindow(window);
-            extern void internal_onKeyState(EKeyCode key, bool state);
 
             switch (action) {
                 case GLFW_PRESS: {
