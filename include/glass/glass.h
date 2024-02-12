@@ -667,6 +667,48 @@ namespace glass {
         GLASS_API void setViewport(const Viewport2D& viewport = {});
 
         /**
+         * @brief Set depth test enabled or disabled
+         */
+        GLASS_API void enableDepthTest();
+        GLASS_API void disableDepthTest();
+
+        /** Poligon winding */
+        enum EPoligonWinding {
+            EPW_Clockwise,
+            EPW_CounterClockwise,
+        };
+
+        /**
+         * @brief Set poligon winding
+         */
+        GLASS_API void setPoligonWinding(EPoligonWinding winding);
+
+        /** Culling mode */
+        enum ECullMode {
+            ECM_None,
+            ECM_Back,
+            ECM_Front,
+            ECM_BackAndFront,
+        };
+
+        /**
+         * @brief Set culling enabled or disabled
+         */
+        GLASS_API void setCullMode(ECullMode mode);
+
+        /** Polygon fill mode */
+        enum EFillMode {
+            EFM_Solid,
+            EFM_Wireframe,
+        };
+
+
+        /**
+         * @brief Set fill mode
+         */
+        void setFillMode(EFillMode mode);
+
+        /**
          * @brief Swap context buffers.
          */
         GLASS_API void present(const Context* context);

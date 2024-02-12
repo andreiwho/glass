@@ -5,9 +5,9 @@ layout(location=1) in vec2 inUV;
 
 layout(location=0) out vec2 outUV;
 
-uniform mat4 uProjection;
+uniform mat4 uViewProjection;
 
 void main(void) {
-    gl_Position = uProjection * vec4(inPosition, 1.0);
+    gl_Position = uViewProjection * vec4(inPosition, 1.0);
     outUV = inUV;
 }

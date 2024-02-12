@@ -27,10 +27,17 @@ int main() {
     gfx::ResourceID vbo{};
     {
         Vertex vertices[] = {
-            { { -0.5f, +0.5f, -3.0f }, { 0.0f, 1.0f } },
-            { { -0.5f, -0.5f, -3.0f }, { 0.0f, 0.0f } },
-            { { +0.5f, -0.5f, -3.0f }, { 1.0f, 0.0f } },
-            { { +0.5f, +0.5f, -3.0f }, { 1.0f, 1.0f } }
+            // Front
+            { { -0.5f, +0.5f, +0.5f }, { 0.0f, 1.0f } },
+            { { -0.5f, -0.5f, +0.5f }, { 0.0f, 0.0f } },
+            { { +0.5f, -0.5f, +0.5f }, { 1.0f, 0.0f } },
+            { { +0.5f, +0.5f, +0.5f }, { 1.0f, 1.0f } },
+
+            // Left
+            { { -0.5f, +0.5f, -0.5f }, { 0.0f, 1.0f } },
+            { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f } },
+            { { -0.5f, -0.5f, +0.5f }, { 1.0f, 0.0f } },
+            { { -0.5f, +0.5f, +0.5f }, { 1.0f, 1.0f } },
         };
 
         gfx::BufferInputLayout layout{};
@@ -43,10 +50,15 @@ int main() {
 
     gfx::ResourceID ibo{};
     {
-        uint32_t indices[] = {
-            0, 1, 3,
-            1, 2, 3
+        // clang-format off
+        uint32_t indices[] {
+            // Front
+            0, 1, 3, 1, 2, 3,
+
+            // Left
+            4, 5, 7, 5, 6, 7,
         };
+        // clang-format on
 
         ibo = gfx::createStaticElementBuffer(indices);
     }
@@ -74,19 +86,21 @@ int main() {
         gfx::clearViewport(gfx::ECF_All, &clearColor);
         gfx::setViewport();
 
-
         gfx::bindVertexBuffer(vbo);
         gfx::bindElementBuffer(ibo);
 
         gfx::bindShaderProgram(program);
         gfx::setUniformTexture(program, "uTexture", texture);
-        
+
+        gfx::enableDepthTest();
+
         // Set projection matrix
         const gp::WindowSize size = gp::getWindowSize(window);
-        gfx::setUniform(program, "uProjection", 
-            glm::perspectiveFov(glm::radians(45.0f), (float)size.Width, (float)size.Height, 0.1f, 100.0f));
+        const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), (float)size.Width, (float)size.Height, 0.1f, 100.0f);
+        const glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(), glm::vec3(0.0f, 1.0f, 0.0f));
+        gfx::setUniform(program, "uViewProjection", projection * view);
 
-        gfx::drawElements(gfx::EPT_Triangles, 6);
+        gfx::drawElements(gfx::EPT_Triangles, 12);
         gfx::present(context);
     }
 

@@ -179,7 +179,7 @@ namespace glass::gfx {
             if (!GCurrentContext) {
                 return;
             }
-            
+
             const platform::WindowSize windowSize = platform::getWindowSize(GCurrentContext->getWindow());
             Viewport2D vp = { viewport.X, viewport.Y, windowSize.Width, windowSize.Height };
             glViewport(vp.X, vp.Y, windowSize.Width, windowSize.Height);
@@ -198,6 +198,72 @@ namespace glass::gfx {
     void makeContextCurrent(const Context* context) {
         glfwMakeContextCurrent(context->getWindow()->getHandle());
         GCurrentContext = context;
+    }
+
+    // Depth test
+    static bool GDepthTestEnabled = false;
+    void enableDepthTest() {
+        if (!GDepthTestEnabled) {
+            glEnable(GL_DEPTH_TEST);
+            GDepthTestEnabled = true;
+        }
+    }
+
+    void disableDepthTest() {
+        if (GDepthTestEnabled) {
+            glDisable(GL_DEPTH_TEST);
+            GDepthTestEnabled = false;
+        }
+    }
+
+    // Poligon winding
+    static EPoligonWinding GPoligonWinding = EPW_CounterClockwise;
+    void setPoligonWinding(EPoligonWinding winding) {
+        if (GPoligonWinding != winding) {
+            glFrontFace(winding == EPW_Clockwise ? GL_CW : GL_CCW);
+            GPoligonWinding = winding;
+        }
+    }
+
+    // Culling
+    static ECullMode GCullMode{ ECM_None };
+    GLASS_API void setCullMode(ECullMode mode) {
+        if (GCullMode == mode) {
+            return;
+        }
+
+        if (mode == ECM_None) {
+            glDisable(GL_CULL_FACE);
+        } else {
+            glEnable(GL_CULL_FACE);
+
+            GLenum face{};
+            switch (mode) {
+                case ECM_Back:
+                    face = GL_BACK;
+                    break;
+                case ECM_Front:
+                    face = GL_FRONT;
+                case ECM_BackAndFront:
+                    face = GL_FRONT_AND_BACK;
+                    break;
+            }
+
+            glCullFace(face);
+        }
+
+        GCullMode = mode;
+    }
+
+    // Fill mode
+    static EFillMode GFillMode = EFM_Solid;
+    void setFillMode(EFillMode mode) {
+        if (GFillMode == mode) {
+            return;
+        }
+
+        glPolygonMode(GL_FRONT_AND_BACK, mode == EFM_Solid ? GL_FILL : GL_LINES);
+        GFillMode = mode;
     }
 
     void draw(EPrimitiveTopology topology, uint32_t vertexCount, uint32_t firstVertex) {
