@@ -1,3 +1,3 @@
 #pragma once
 
-namespace glass::gfx {}
+#include "glass/glass.h"

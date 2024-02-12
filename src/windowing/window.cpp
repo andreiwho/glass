@@ -10,7 +10,7 @@ namespace glass::platform {
 #ifndef NDEBUG
         glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
 #endif
-
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GLASS_CONTEXT_VERSION_MAJOR);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GLASS_CONTEXT_VERSION_MINOR);
         glfwWindowHint(GLFW_RESIZABLE, spec.Resizable ? GLFW_TRUE : GLFW_FALSE);
@@ -233,6 +233,8 @@ namespace glass::platform {
             event.Type = EWindowEventType::WindowClose;
 
             myWindow->executeCallback(event);
+
+            gfx::destroyContext(gfx::getContextForWindow(myWindow));
 
             // Send event to platfom
             destroyWindow(myWindow);

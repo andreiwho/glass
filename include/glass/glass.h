@@ -567,6 +567,7 @@ namespace glass {
     } // namespace platform
 
     namespace gfx {
+        using ResourceID = uint64_t;
 
         struct ContextSpec {
             /** Window to create the context for */
@@ -608,5 +609,256 @@ namespace glass {
          * @brief Swap context buffers.
          */
         GLASS_API void present(const Context* context);
+
+        /**
+         * Resources API
+         */
+
+        /** How the buffer is going to be used */
+        enum EBufferUsage {
+            /** The buffer will be used for drawing */
+            EBU_Draw,
+
+            /** The buffer will be used for copying data to other resources. */
+            EBU_Copy,
+
+            /** The buffer will be using for readback from GPU. */
+            EBU_Read,
+        };
+
+        /** How often the buffer is going to be updated */
+        enum EBufferMutability {
+            /** Buffer contents are going to be assigned once and never or rarely updated. */
+            EBM_Static,
+
+            /** Buffer contents are going to be updated frequently (e.g. once per frame) */
+            EBM_Dynamic,
+
+            /** Buffer is created for data streaming and will be updated rarely or never. */
+            EBM_Stream,
+        };
+
+        /** What type of buffer this is */
+        enum EBufferType : uint16_t {
+            /** Invalid case */
+            EBT_Unknown,
+
+            /** The buffer is a vertex buffer */
+            EBT_Vertex,
+
+            /** The buffer is an index buffer */
+            EBT_Element,
+
+            /** The buffer is a uniform buffer */
+            EBT_Uniform,
+
+            /** The buffer is a storage buffer */
+            EBT_Storage,
+        };
+
+        /** Value type */
+        enum EValueType {
+            EVT_Float,
+            EVT_Int,
+            EVT_UInt,
+        };
+
+        enum EBufferDataRate {
+            EBDR_PerVertex,
+            EBDR_PerInstance,
+        };
+
+        /** Buffer input element. */
+        struct BufferInputElement {
+            /** Use this value to automatically generate the input layout */
+            EValueType Type{};
+            uint32_t Count{};
+            bool Normalize{ false };
+            EBufferDataRate DataRate{EBDR_PerVertex};
+        };
+
+        /** Buffer input layout */
+        class GLASS_API BufferInputLayout {
+        public:
+            BufferInputLayout& add(EValueType type, uint32_t componentCount, bool normalize = false, EBufferDataRate dataRate = EBDR_PerVertex);
+            inline const std::vector<BufferInputElement>& getElements() const { return m_Elements; }
+
+        private:
+            std::vector<BufferInputElement> m_Elements{};
+        };
+
+        /** Specification of the buffer */
+        struct BufferSpec {
+            /** The size of allocated memory for buffer (in bytes) */
+            uint64_t SizeInBytes{};
+
+            /** The size of a single element of the buffer (e.g. Vertex size for vertex buffer or element size for storage buffer) */
+            uint64_t StrideInBytes{};
+
+            /** How the buffer is going to be used. */
+            EBufferUsage Usage{ EBU_Draw };
+
+            /** How often the buffer is going to be modified */
+            EBufferMutability Mutability{ EBM_Static };
+
+            /** What kind of buffer this is. */
+            EBufferType BufferType{ EBT_Unknown };
+
+            /** Used for vertex buffer. The vertex input layout. */
+            const BufferInputLayout* InputLayout{};
+
+            /** Used to initialize buffer with data. */
+            const void* InitialData{};
+
+            /** Used to initialize buffer with data */
+            uint64_t InitialDataSize{};
+        };
+
+        /**
+         * @brief Creates buffer.
+         * @param spec Buffer specification.
+         * @return ResourceID the id of the buffer.
+         */
+        GLASS_API ResourceID createBuffer(const BufferSpec& spec);
+
+        GLASS_API void destroyBuffer(ResourceID buffer);
+
+        /**
+         * Buffer helpers
+         */
+        template<typename VertexType>
+        ResourceID createStaticVertexBuffer(uint64_t size, const VertexType* data, const BufferInputLayout* inputLayout) {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Vertex;
+            spec.StrideInBytes = sizeof(VertexType);
+            spec.SizeInBytes = size;
+            spec.InitialData = data;
+            spec.InitialDataSize = data ? size : 0;
+            spec.InputLayout = inputLayout;
+            return createBuffer(spec);
+        }
+
+        template <typename VertexType, uint64_t size>
+        ResourceID createStaticVertexBuffer(VertexType(&data)[size], const BufferInputLayout* inputLayout) {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Vertex;
+            spec.StrideInBytes = sizeof(VertexType);
+            spec.SizeInBytes = size * sizeof(VertexType);
+            spec.InitialData = data;
+            spec.InitialDataSize = size * sizeof(VertexType);
+            spec.InputLayout = inputLayout;
+            return createBuffer(spec);
+        }
+
+        template <typename VertexType>
+        ResourceID createDynamicVertexBuffer(uint64_t size, const VertexType* data, const BufferInputLayout* inputLayout) {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Vertex;
+            spec.Mutability = gfx::EBM_Dynamic;
+            spec.StrideInBytes = sizeof(VertexType);
+            spec.SizeInBytes = size;
+            spec.InitialData = data;
+            spec.InitialDataSize = data ? size : 0;
+            spec.InputLayout = inputLayout;
+            return createBuffer(spec);
+        }
+
+        template <typename IndexType, uint64_t size>
+        ResourceID createStaticElementBuffer(IndexType (&data)[size]) {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Element;
+            spec.StrideInBytes = sizeof(IndexType);
+            spec.SizeInBytes = size * sizeof(IndexType);
+            spec.InitialData = data;
+            spec.InitialDataSize = size * sizeof(IndexType);
+            return createBuffer(spec);
+        }
+
+        template <typename IndexType>
+        ResourceID createDynamicElementBuffer(uint64_t size, const IndexType* data) {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Element;
+            spec.Mutability = gfx::EBM_Dynamic;
+            spec.StrideInBytes = sizeof(IndexType);
+            spec.SizeInBytes = size;
+            spec.InitialData = data;
+            spec.InitialDataSize = size;
+            return createBuffer(spec);
+        }
+
+        /**
+         * @brief Writes buffer data
+         * @param buffer the buffer to update
+         * @param data Data to write to the buffer
+         * @param dataSize Size of the data written to the buffer
+         * @param offset offset in bytes from buffer start
+         */
+        GLASS_API void writeBufferData(ResourceID buffer, const void* data, uint64_t dataSize, uint64_t offset = 0);
+
+        /** Bind vertex buffer to the pipeline */
+        GLASS_API void bindVertexBuffer(ResourceID buffer);
+
+        /** Bind element buffer to the pipeline */
+        GLASS_API void bindElementBuffer(ResourceID buffer);
+
+        /**
+         * SHADER API
+         */
+        enum EShaderType {
+            EST_VertexShader,
+            EST_FragmentShader,
+            EST_ComputeShader,
+            EST_GeometryShader,
+            EST_TesellationControlShader,
+            EST_TesellationEvaluationShader,
+        };
+
+        class Shader;
+        class ShaderProgram;
+
+        struct ProgramSpec {
+            Shader* VertexShader{};
+            Shader* FragmentShader{};
+            Shader* ComputeShader{};
+            Shader* GeometryShader{};
+            Shader* TesellationControlShader{};
+            Shader* TesellationEvaluationShader{};
+        };
+
+        GLASS_API Shader* getOrCreateShader(const std::string& path, EShaderType type);
+
+        GLASS_API ShaderProgram* getOrCreateShaderProgram(const ProgramSpec& spec);
+
+        GLASS_API void bindShaderProgram(const ShaderProgram* program);
+
+        /**
+         * DRAWING
+         */
+        enum EPrimitiveTopology {
+            EPT_Triangles,
+            EPT_Lines,
+            EPT_Points,
+        };
+
+        enum EIndexType {
+            EIT_UInt16,
+            EIT_UInt32,
+        };
+
+        /**
+         * Draw arrays.
+         * @param topology Primitive topology (triangles, lines or points)
+         * @param vertexCount number of vertices to draw
+         * @param firstVertex the vertex to begin from (offset from the start of the buffer)
+         */
+        void draw(EPrimitiveTopology topology, uint32_t vertexCount, uint32_t firstVertex = 0);
+
+        /**
+         * Draw elements.
+         * @param topology Primitive topology (triangles, lines or points)
+         * @param indexCount number of indices to draw
+         * @param indexType type of index.
+         */
+        void drawElements(EPrimitiveTopology topology, uint32_t indexCount, EIndexType indexType = EIT_UInt32);
     } // namespace gfx
 } // namespace glass
