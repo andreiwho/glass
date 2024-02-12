@@ -48,7 +48,7 @@ int main() {
             .add(gfx::EVT_Float, 3)
             .add(gfx::EVT_Float, 3);
 
-        vbo = gfx::createDynamicVertexBuffer(sizeof(vertices), vertices, &layout);
+        vbo = gfx::createStaticVertexBuffer(vertices, &layout);
     }
 
     gfx::ResourceID ibo{};
@@ -60,11 +60,18 @@ int main() {
         ibo = gfx::createStaticElementBuffer(indices);
     }
 
+    gfx::ProgramSpec programSpec {
+        .VertexShader = gfx::getOrCreateShader("shaders/test.vert", gfx::EST_VertexShader),
+        .FragmentShader = gfx::getOrCreateShader("shaders/test.frag", gfx::EST_FragmentShader)
+    };
+    gfx::ShaderProgram* program = gfx::getOrCreateShaderProgram(programSpec);
+
     while (gp::pollEvents()) {
 
         gfx::bindVertexBuffer(vbo);
         gfx::bindElementBuffer(ibo);
 
+        gfx::bindShaderProgram(program);
         gfx::drawElements(gfx::EPT_Triangles, 3);
         gfx::present(context);
     }

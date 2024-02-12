@@ -1,4 +1,4 @@
-file(GLOB_RECURSE PROJECT_FILES src/**.h src/**.cpp LIST_DIRECTORIES TRUE)
+file(GLOB_RECURSE PROJECT_FILES src/**.h src/**.cpp shaders/**.vert shaders/**.frag LIST_DIRECTORIES TRUE)
 
 add_executable(test ${PROJECT_FILES})
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${PROJECT_FILES})

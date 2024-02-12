@@ -5,6 +5,7 @@
 
 #include "cassert"
 #include "ranges"
+#include "glShader.h"
 
 namespace glass::gfx {
 
@@ -97,6 +98,7 @@ namespace glass::gfx {
 
     void shutdown() {
         GContextData.reset();
+        terminateShaderLibrary();
         GContextData = nullptr;
     }
 
@@ -196,10 +198,10 @@ namespace glass::gfx {
         GLenum glIndexType{};
         switch (indexType) {
             case EIT_UInt16:
-                glIndexType = GL_UNSIGNED_INT;
+                glIndexType = GL_UNSIGNED_SHORT;
                 break;
             case EIT_UInt32:
-                glIndexType = GL_UNSIGNED_SHORT;
+                glIndexType = GL_UNSIGNED_INT;
                 break;
             default:
                 break;

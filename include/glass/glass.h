@@ -768,7 +768,7 @@ namespace glass {
             gfx::BufferSpec spec{};
             spec.BufferType = gfx::EBT_Element;
             spec.StrideInBytes = sizeof(IndexType);
-            spec.SizeInBytes = size;
+            spec.SizeInBytes = size * sizeof(IndexType);
             spec.InitialData = data;
             spec.InitialDataSize = size * sizeof(IndexType);
             return createBuffer(spec);
@@ -814,6 +814,7 @@ namespace glass {
         };
 
         class Shader;
+        class ShaderProgram;
 
         struct ProgramSpec {
             Shader* VertexShader{};
@@ -824,7 +825,11 @@ namespace glass {
             Shader* TesellationEvaluationShader{};
         };
 
-        Shader* createShader(const std::string& path, EShaderType type);
+        GLASS_API Shader* getOrCreateShader(const std::string& path, EShaderType type);
+
+        GLASS_API ShaderProgram* getOrCreateShaderProgram(const ProgramSpec& spec);
+
+        GLASS_API void bindShaderProgram(const ShaderProgram* program);
 
         /**
          * DRAWING
