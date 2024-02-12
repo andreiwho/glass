@@ -18,9 +18,16 @@ namespace glass::platform {
         glfwWindowHint(GLFW_FOCUSED, spec.Focused ? GLFW_TRUE : GLFW_FALSE);
         glfwWindowHint(GLFW_MAXIMIZED, spec.Maximized ? GLFW_TRUE : GLFW_FALSE);
 
+        if (spec.Fullscreen) {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            int x, y, width, height;
+            glfwGetMonitorWorkarea(monitor, &x, &y, &width, &height);
+            m_Spec.Size = { width, height };
+        }
+
         m_Window = glfwCreateWindow(
-            spec.Size.Width,
-            spec.Size.Height,
+            m_Spec.Size.Width,
+            m_Spec.Size.Height,
             spec.Title.c_str(),
             spec.Fullscreen ? glfwGetPrimaryMonitor() : nullptr,
             spec.SharedContext ? spec.SharedContext->m_Window : nullptr);

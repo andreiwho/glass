@@ -50,6 +50,7 @@ int main() {
     spec.Size = { 1280, 720 };
     spec.Title = "Hello, Glass";
     spec.Resizable = true;
+    spec.Fullscreen = true;
     spec.EventCallback = [](const gp::WindowEvent& event) {
         gp::EventDispatcher dispatcher{ event };
         dispatcher.dispatch(+[](const gp::MouseButtonPressEvent& event) {
@@ -183,7 +184,7 @@ int main() {
 
         // Set projection matrix
         const gp::WindowSize size = gp::getWindowSize(window);
-        const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), (float)size.Width, (float)size.Height, 0.1f, 100.0f);
+        const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), glm::max(1.0f, (float)size.Width), glm::max(1.0f, (float)size.Height), 0.1f, 100.0f);
 
         /**
          * CAMERA
