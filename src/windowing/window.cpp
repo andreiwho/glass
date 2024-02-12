@@ -159,9 +159,14 @@ namespace glass::platform {
             event.Type = EWindowEventType::MouseMove;
 
             myWindow->executeCallback(event);
+
+            extern void internal_onMouseMove(double x, double y);
+            internal_onMouseMove(x, y);
         });
 
         glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int) {
+            extern void internal_onMouseButtonState(EMouseButton button, bool state);
+
             auto myWindow = getWindow(window);
             if (action == GLFW_PRESS) {
                 MouseButtonPressEvent event{};
@@ -169,17 +174,20 @@ namespace glass::platform {
                 event.Button = static_cast<EMouseButton>(button);
                 event.Type = EWindowEventType::MouseButtonPress;
                 myWindow->executeCallback(event);
+                internal_onMouseButtonState(event.Button, true);
             } else {
                 MouseButtonReleaseEvent event{};
                 event.EventWindow = myWindow;
                 event.Button = static_cast<EMouseButton>(button);
                 event.Type = EWindowEventType::MouseButtonRelease;
                 myWindow->executeCallback(event);
+                internal_onMouseButtonState(event.Button, false);
             }
         });
 
         glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int, int action, int) {
             auto myWindow = getWindow(window);
+            extern void internal_onKeyState(EKeyCode key, bool state);
 
             switch (action) {
                 case GLFW_PRESS: {
@@ -188,6 +196,7 @@ namespace glass::platform {
                     event.Type = EWindowEventType::KeyPress;
                     event.KeyCode = static_cast<EKeyCode>(key);
                     myWindow->executeCallback(event);
+                    internal_onKeyState(event.KeyCode, true);
                 } break;
                 case GLFW_RELEASE: {
                     KeyReleaseEvent event{};
@@ -195,6 +204,7 @@ namespace glass::platform {
                     event.Type = EWindowEventType::KeyRelease;
                     event.KeyCode = static_cast<EKeyCode>(key);
                     myWindow->executeCallback(event);
+                    internal_onKeyState(event.KeyCode, false);
                 } break;
                 case GLFW_REPEAT: {
                     KeyRepeatEvent event;

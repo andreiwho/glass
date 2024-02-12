@@ -564,6 +564,28 @@ namespace glass {
          */
         GLASS_API void setWindowEventCallback(Window* window, GLASS_PFN_WindowEventCallback callback);
 
+        /** @brief Get key pressed state. */
+        GLASS_API bool isKeyDown(EKeyCode key);
+
+        /** @brief Get mouse button pressed state */
+        GLASS_API bool isMouseButtonDown(EMouseButton button);
+
+        struct MouseVec2 {
+            double X;
+            double Y;
+        };
+
+        /** Gets mouse position. */
+        GLASS_API MouseVec2 getMousePosition();
+
+        /** Gets mouse offset from next frame */
+        GLASS_API MouseVec2 getMouseOffset();
+
+        /** Get time elapsed since previous call to pollEvents() */
+        GLASS_API double getDeltaTime();
+
+        /** Get current application time in seconds. */
+        GLASS_API double getTime();
     } // namespace platform
 
     namespace gfx {

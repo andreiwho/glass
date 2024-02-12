@@ -14,9 +14,7 @@ void onKeyPress(const gp::KeyPressEvent& event) {
 }
 
 void onWindowEvent(const gp::WindowEvent& event) {
-    gp::EventDispatcher disp(event);
-    disp.dispatch(&onMouseMove);
-    disp.dispatch(&onKeyPress);
+    std::println("{}", event.toString());
 }
 
 struct Vertex {
@@ -31,6 +29,7 @@ int main() {
     spec.Size = { 1280, 720 };
     spec.Title = "Hello, Glass";
     spec.EventCallback = onWindowEvent;
+    spec.Resizable = true;
 
     gp::Window* window = gp::createWindow(spec);
     gfx::Context* context = gfx::createContext({ window });
