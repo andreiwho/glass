@@ -13,6 +13,36 @@ struct Vertex {
     glm::vec2 uv;
 };
 
+static float yaw{-90.0f};
+static float pitch{};
+static glm::vec3 camPos{ 0.0f, 0.0f, 5.0f };
+static float camSensitivity{ 100.0f };
+static bool isControllingCamera = false;
+static glm::vec3 cameraDirection{};
+static float cameraMoveSpeed = 10.0f;
+
+void controlCameraPos() {
+    const glm::vec3 up{ 0.0f, 1.0f, 0.0f };
+    const glm::vec3 forward = glm::normalize(cameraDirection);
+    const glm::vec3 right = glm::cross(forward, up);
+
+    if (gp::isKeyDown(gp::EKeyCode::W)) {
+        camPos -= forward * cameraMoveSpeed * (float)gp::getDeltaTime();
+    } 
+
+    if (gp::isKeyDown(gp::EKeyCode::S)) {
+        camPos += forward * cameraMoveSpeed * (float)gp::getDeltaTime();
+    }
+
+    if (gp::isKeyDown(gp::EKeyCode::A)) {
+        camPos += right * cameraMoveSpeed * (float)gp::getDeltaTime();
+    }
+
+    if (gp::isKeyDown(gp::EKeyCode::D)) {
+        camPos -= right * cameraMoveSpeed * (float)gp::getDeltaTime();
+    }
+}
+
 int main() {
     assert(gp::init());
     gp::WindowSpec spec{};
@@ -20,6 +50,32 @@ int main() {
     spec.Size = { 1280, 720 };
     spec.Title = "Hello, Glass";
     spec.Resizable = true;
+    spec.EventCallback = [](const gp::WindowEvent& event) {
+        gp::EventDispatcher dispatcher{ event };
+        dispatcher.dispatch(+[](const gp::MouseButtonPressEvent& event) {
+            if (event.Button == gp::EMouseButton::Right) {
+                gp::disableCursor(event.EventWindow);
+                isControllingCamera = true;
+            }
+        });
+        dispatcher.dispatch(+[](const gp::MouseButtonReleaseEvent& event) {
+            if (event.Button == gp::EMouseButton::Right) {
+                gp::enableCursor(event.EventWindow);
+                isControllingCamera = false;
+            }
+        });
+        dispatcher.dispatch(+[](const gp::MouseMoveEvent& event) {
+            if (isControllingCamera) {
+                yaw += static_cast<float>(gp::getMouseOffset().X * camSensitivity * gp::getDeltaTime());
+                pitch -= static_cast<float>(gp::getMouseOffset().Y * camSensitivity * gp::getDeltaTime());
+
+                if (pitch > 89.0f)
+                    pitch = 89.0f;
+                if (pitch < -89.0f)
+                    pitch = -89.0f;
+            }
+        });
+    };
 
     gp::Window* window = gp::createWindow(spec);
     gfx::Context* context = gfx::createContext({ window });
@@ -129,7 +185,16 @@ int main() {
         const gp::WindowSize size = gp::getWindowSize(window);
         const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), (float)size.Width, (float)size.Height, 0.1f, 100.0f);
 
-        const glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(), glm::vec3(0.0f, 1.0f, 0.0f));
+        /**
+         * CAMERA
+         */
+        cameraDirection.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+        cameraDirection.y = glm::sin(glm::radians(pitch));
+        cameraDirection.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+        glm::vec3 cameraFront = glm::normalize(cameraDirection);
+        controlCameraPos();
+
+        const glm::mat4 view = glm::lookAt(camPos, camPos + cameraFront, glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 model = glm::rotate(glm::mat4(1.0f), (float)gp::getTime(), glm::vec3(1.0f, 1.0f, 1.0f));
 
         gfx::setUniform(program, "uViewProjection", projection * view);
