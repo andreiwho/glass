@@ -38,6 +38,30 @@ int main() {
             { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f } },
             { { -0.5f, -0.5f, +0.5f }, { 1.0f, 0.0f } },
             { { -0.5f, +0.5f, +0.5f }, { 1.0f, 1.0f } },
+
+            // Right
+            { { +0.5f, +0.5f, +0.5f }, { 0.0f, 1.0f } },
+            { { +0.5f, -0.5f, +0.5f }, { 0.0f, 0.0f } },
+            { { +0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f } },
+            { { +0.5f, +0.5f, -0.5f }, { 1.0f, 1.0f } },
+
+            // Back
+            { { +0.5f, +0.5f, -0.5f }, { 0.0f, 1.0f } },
+            { { +0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f } },
+            { { -0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f } },
+            { { -0.5f, +0.5f, -0.5f }, { 1.0f, 1.0f } },
+
+            // Top
+            { { -0.5f, +0.5f, -0.5f }, { 0.0f, 1.0f } },
+            { { -0.5f, +0.5f, +0.5f }, { 0.0f, 0.0f } },
+            { { +0.5f, +0.5f, +0.5f }, { 1.0f, 0.0f } },
+            { { +0.5f, +0.5f, -0.5f }, { 1.0f, 1.0f } },
+
+            // Bottom
+            { { -0.5f, -0.5f, +0.5f }, { 0.0f, 1.0f } },
+            { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f } },
+            { { +0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f } },
+            { { +0.5f, -0.5f, +0.5f }, { 1.0f, 1.0f } },
         };
 
         gfx::BufferInputLayout layout{};
@@ -48,20 +72,29 @@ int main() {
         vbo = gfx::createStaticVertexBuffer(vertices, &layout);
     }
 
-    gfx::ResourceID ibo{};
-    {
-        // clang-format off
-        uint32_t indices[] {
-            // Front
-            0, 1, 3, 1, 2, 3,
+    // clang-format off
+    uint32_t indices[] {
+        // Front
+        0, 1, 3, 1, 2, 3,
 
-            // Left
-            4, 5, 7, 5, 6, 7,
-        };
-        // clang-format on
+        // Left
+        4, 5, 7, 5, 6, 7,
 
-        ibo = gfx::createStaticElementBuffer(indices);
-    }
+        // Right
+        8, 9, 11, 9, 10, 11,
+
+        // Back
+        12 ,13, 15, 13, 14, 15,
+
+        // Top
+        16, 17, 19, 17, 18, 19,
+
+        // Bottom
+        20, 21, 23, 21, 22, 23
+    };
+    // clang-format on
+
+    gfx::ResourceID ibo = gfx::createStaticElementBuffer(indices);
 
     gfx::ProgramSpec programSpec{
         .VertexShader = gfx::getOrCreateShader("shaders/test.vert", gfx::EST_VertexShader),
@@ -92,15 +125,21 @@ int main() {
         gfx::bindShaderProgram(program);
         gfx::setUniformTexture(program, "uTexture", texture);
 
-        gfx::enableDepthTest();
-
         // Set projection matrix
         const gp::WindowSize size = gp::getWindowSize(window);
         const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), (float)size.Width, (float)size.Height, 0.1f, 100.0f);
-        const glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(), glm::vec3(0.0f, 1.0f, 0.0f));
-        gfx::setUniform(program, "uViewProjection", projection * view);
 
-        gfx::drawElements(gfx::EPT_Triangles, 12);
+        const glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 model = glm::rotate(glm::mat4(1.0f), (float)gp::getTime(), glm::vec3(1.0f, 1.0f, 1.0f));
+
+        gfx::setUniform(program, "uViewProjection", projection * view);
+        gfx::setUniform(program, "uModel", model);
+
+        gfx::enableDepthTest();
+        gfx::setFillMode(gfx::EFM_Solid);
+        gfx::setCullMode(gfx::ECM_Back);
+
+        gfx::drawElements(gfx::EPT_Triangles, (uint32_t)std::size(indices));
         gfx::present(context);
     }
 

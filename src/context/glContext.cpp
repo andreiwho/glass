@@ -262,7 +262,7 @@ namespace glass::gfx {
             return;
         }
 
-        glPolygonMode(GL_FRONT_AND_BACK, mode == EFM_Solid ? GL_FILL : GL_LINES);
+        glPolygonMode(GL_FRONT_AND_BACK, mode == EFM_Solid ? GL_FILL : GL_LINE);
         GFillMode = mode;
     }
 
