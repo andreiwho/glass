@@ -6,6 +6,9 @@
 #include "variant"
 #include "format"
 #include "functional"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #ifdef GLASS_SHARED
     #ifdef _MSC_VER
@@ -578,7 +581,7 @@ namespace glass {
         /** Gets mouse position. */
         GLASS_API MouseVec2 getMousePosition();
 
-        /** Gets mouse offset from next frame */
+        /** Gets mouse offset from previous frame */
         GLASS_API MouseVec2 getMouseOffset();
 
         /** Get time elapsed since previous call to pollEvents() */
@@ -696,7 +699,7 @@ namespace glass {
             EValueType Type{};
             uint32_t Count{};
             bool Normalize{ false };
-            EBufferDataRate DataRate{EBDR_PerVertex};
+            EBufferDataRate DataRate{ EBDR_PerVertex };
         };
 
         /** Buffer input layout */
@@ -748,7 +751,7 @@ namespace glass {
         /**
          * Buffer helpers
          */
-        template<typename VertexType>
+        template <typename VertexType>
         ResourceID createStaticVertexBuffer(uint64_t size, const VertexType* data, const BufferInputLayout* inputLayout) {
             gfx::BufferSpec spec{};
             spec.BufferType = gfx::EBT_Vertex;
@@ -761,7 +764,7 @@ namespace glass {
         }
 
         template <typename VertexType, uint64_t size>
-        ResourceID createStaticVertexBuffer(VertexType(&data)[size], const BufferInputLayout* inputLayout) {
+        ResourceID createStaticVertexBuffer(VertexType (&data)[size], const BufferInputLayout* inputLayout) {
             gfx::BufferSpec spec{};
             spec.BufferType = gfx::EBT_Vertex;
             spec.StrideInBytes = sizeof(VertexType);
@@ -823,6 +826,84 @@ namespace glass {
         /** Bind element buffer to the pipeline */
         GLASS_API void bindElementBuffer(ResourceID buffer);
 
+        /** Type of texture (dimensions) */
+        enum ETextureType : uint16_t {
+            /** 1D texture (x only) */
+            ETT_Texture1D,
+
+            /** 2D texture (xy) */
+            ETT_Texture2D,
+
+            /** 3D texture (xyz) */
+            ETT_Texture3D,
+
+            /** Cube texture (made of 6 2D planes) */
+            ETT_TextureCube,
+        };
+
+        /** Pixel format of the texture */
+        enum EPixelFormat : uint16_t {
+            /** RGB 24 bit format */
+            EPF_RGB8,
+
+            /** RGBA 32 bit format */
+            EPF_RGBA8,
+
+            /** RGB 32bit format with HDR support */
+            EPF_R11G11B10F,
+
+            /** D24S8 bit format for handling depth stencil components */
+            EPF_DepthStencil,
+        };
+
+        /** Texture filtering mode */
+        enum ETextureFilter {
+            /** Linear interpolation between pixels, smoother colors */
+            ETF_Linear,
+
+            /** Non-interpolated mode. More pixelated look. */
+            ETF_Nearest,
+        };
+
+        /** Wrapping mode for the texture. */
+        enum ETextureWrapMode {
+            /**  The default behavior for textures. Repeats the texture image. */
+            ETWM_Repeat,
+
+            /** Same as Repeat but mirrors the image with each repeat */
+            ETWM_MirroredRepeat,
+
+            /**  Clamps the coordinates between 0 and 1. The result is that higher coordinates become clamped to the edge, resulting in a stretched edge pattern. */
+            ETWM_ClampToEdge,
+
+            /** Coordinates outside the range are now given a user-specified border color. */
+            ETWM_ClampToBorder,
+        };
+
+        /** Specification for texture sampler */
+        struct SamplerSpec {
+            ETextureFilter MinFilter{ETF_Linear};
+            ETextureFilter MagFilter{ETF_Linear};
+            ETextureWrapMode WrapModeS{ ETWM_ClampToEdge };
+            ETextureWrapMode WrapModeT{ ETWM_ClampToEdge };
+            ETextureWrapMode WrapModeU{ ETWM_ClampToEdge };
+        };
+
+        /** Specification for texture creation */
+        struct TextureSpec {
+            ETextureType Type{ETT_Texture2D};
+            EPixelFormat Format{EPF_RGBA8};
+            int32_t Width{1};
+            int32_t Height{1};
+            int32_t Depth{1};
+            bool GenerateMipmaps{true};
+            SamplerSpec Sampler{};
+
+            const void* InitialData{};
+        };
+
+        GLASS_API ResourceID createTexture(const TextureSpec& spec);
+
         /**
          * SHADER API
          */
@@ -847,11 +928,43 @@ namespace glass {
             Shader* TesellationEvaluationShader{};
         };
 
+        /**
+         * Get or create shader. If shader was already created with this path, a valid instance will be returned.
+         */
         GLASS_API Shader* getOrCreateShader(const std::string& path, EShaderType type);
 
+        /**
+         * Get or create shader program. If program already exists, it will be returned.
+         */
         GLASS_API ShaderProgram* getOrCreateShaderProgram(const ProgramSpec& spec);
 
+        /**
+         * Binds shader program to the pipeline.
+         */
         GLASS_API void bindShaderProgram(const ShaderProgram* program);
+
+        /**
+         * Set shader program uniforms
+         */
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, float uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::vec2 uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::vec3 uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::vec4 uniform);
+
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, int32_t uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::ivec2 uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::ivec3 uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::ivec4 uniform);
+
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, uint32_t uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::uvec2 uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::uvec3 uniform);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::uvec4 uniform);
+        
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat3& uniform, bool transpose = false);
+        GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat4& uniform, bool transpose = false);
+
+        GLASS_API void setUniformTexture(const ShaderProgram* program, const char* name, ResourceID id, uint32_t slot = 0);
 
         /**
          * DRAWING

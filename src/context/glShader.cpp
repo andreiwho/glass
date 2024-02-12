@@ -9,10 +9,11 @@
 #include "print"
 #include "cassert"
 #include "vector"
+#include "glTexture.h"
 
-namespace glass::gfx {    
+namespace glass::gfx {
     static std::string readShaderSource(const std::string& path) {
-        std::ifstream shaderSource {path};
+        std::ifstream shaderSource{ path };
         assert(shaderSource.is_open());
 
         std::stringstream source;
@@ -58,7 +59,7 @@ namespace glass::gfx {
         return outShader.get();
     }
 
-    Shader::Shader(uint32_t shader, EShaderType type) 
+    Shader::Shader(uint32_t shader, EShaderType type)
         : m_Id(shader)
         , m_Type(type) {
     }
@@ -75,7 +76,6 @@ namespace glass::gfx {
 
     ShaderProgram::ShaderProgram(uint32_t id)
         : m_Id(id) {
-        
     }
 
     ShaderProgram::~ShaderProgram() {
@@ -84,14 +84,31 @@ namespace glass::gfx {
         }
     }
 
+    int32_t ShaderProgram::getUniformLocation(const char* name) const {
+        uint64_t hash = hash::hash64(name, strlen(name));
+        const auto iter = m_UniformLocations.find(hash);
+        if (iter != m_UniformLocations.end()) {
+            return (*iter).second;
+        }
+
+        int32_t location = glGetUniformLocation(m_Id, name);
+        if (location == -1) {
+            std::println("GLASS warning: Failed to find uniform location with name: {}", name);
+            return location;
+        }
+
+        m_UniformLocations[hash] = location;
+        return location;
+    }
+
     static uint64_t calculateShaderProgramHash(const ProgramSpec& spec) {
         uint64_t specHash = 0x13ee5;
-        hashCombine(specHash, spec.VertexShader);
-        hashCombine(specHash, spec.FragmentShader);
-        hashCombine(specHash, spec.ComputeShader);
-        hashCombine(specHash, spec.GeometryShader);
-        hashCombine(specHash, spec.TesellationControlShader);
-        hashCombine(specHash, spec.TesellationEvaluationShader);
+        hash::hashCombine(specHash, spec.VertexShader);
+        hash::hashCombine(specHash, spec.FragmentShader);
+        hash::hashCombine(specHash, spec.ComputeShader);
+        hash::hashCombine(specHash, spec.GeometryShader);
+        hash::hashCombine(specHash, spec.TesellationControlShader);
+        hash::hashCombine(specHash, spec.TesellationEvaluationShader);
         return specHash;
     }
 
@@ -151,7 +168,7 @@ namespace glass::gfx {
             std::println("GLASS: Failed to validate program: {}", logInfo);
             return nullptr;
         }
-        
+
         std::shared_ptr<ShaderProgram> outProgram = std::make_shared<ShaderProgram>(program);
         GShaderRegistry->Programs[hash] = outProgram;
         return outProgram.get();
@@ -160,4 +177,83 @@ namespace glass::gfx {
     void bindShaderProgram(const ShaderProgram* program) {
         glUseProgram(program->getId());
     }
-}
+
+    void setUniform(const ShaderProgram* program, const char* name, float uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform1f(program->getId(), location, uniform);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::vec2 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform2f(program->getId(), location, uniform.x, uniform.y);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::vec3 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform3f(program->getId(), location, uniform.x, uniform.y, uniform.z);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::vec4 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform4f(program->getId(), location, uniform.x, uniform.y, uniform.z, uniform.w);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, int32_t uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform1i(program->getId(), location, uniform);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::ivec2 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform2i(program->getId(), location, uniform.x, uniform.y);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::ivec3 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform3i(program->getId(), location, uniform.x, uniform.y, uniform.z);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::ivec4 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform4i(program->getId(), location, uniform.x, uniform.y, uniform.z, uniform.w);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, uint32_t uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform1ui(program->getId(), location, uniform);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::uvec2 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform2ui(program->getId(), location, uniform.x, uniform.y);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::uvec3 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform3ui(program->getId(), location, uniform.x, uniform.y, uniform.z);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, glm::uvec4 uniform) {
+        int32_t location = program->getUniformLocation(name);
+        glProgramUniform4ui(program->getId(), location, uniform.x, uniform.y, uniform.z, uniform.w);
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, const glm::mat3& uniform, bool transpose) {
+        glProgramUniformMatrix3fv(program->getId(), program->getUniformLocation(name), 1, transpose, glm::value_ptr(uniform));
+    }
+
+    void setUniform(const ShaderProgram* program, const char* name, const glm::mat4& uniform, bool transpose) {
+        glProgramUniformMatrix4fv(program->getId(), program->getUniformLocation(name), 1, transpose, glm::value_ptr(uniform));
+    }
+
+    void setUniformTexture(const ShaderProgram* program, const char* name, ResourceID id, uint32_t slot) {
+        TextureHandle handle{};
+        handle.Id = id;
+        
+        const GLenum textureType = toGLTextureType(handle.Type);
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(textureType, handle.TextureID);
+        setUniform(program, name, static_cast<int32_t>(slot));
+    }
+
+} // namespace glass::gfx

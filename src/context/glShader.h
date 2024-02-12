@@ -21,9 +21,11 @@ namespace glass::gfx {
         ~ShaderProgram();
 
         inline uint32_t getId() const { return m_Id; }
+        int32_t getUniformLocation(const char* name) const;
 
     private:
         uint32_t m_Id{};
+        mutable std::unordered_map<uint64_t, int32_t> m_UniformLocations{};
     };
 
     void terminateShaderLibrary();

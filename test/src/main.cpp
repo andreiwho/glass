@@ -2,6 +2,9 @@
 #include "assert.h"
 #include "print"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 namespace gp = glass::platform;
 namespace gfx = glass::gfx;
 
@@ -18,8 +21,8 @@ void onWindowEvent(const gp::WindowEvent& event) {
 }
 
 struct Vertex {
-    float pos[3];
-    float col[3];
+    glm::vec3 pos;
+    glm::vec2 uv;
 };
 
 int main() {
@@ -37,15 +40,16 @@ int main() {
     gfx::ResourceID vbo{};
     {
         Vertex vertices[] = {
-            { {  0.0f,  0.5f, 0.0f },  { 1.0f, 0.0f, 0.0f } },
-            { { -0.5f, -0.5f, 0.0f },  { 0.0f, 1.0f, 0.0f } },
-            { {  0.5f, -0.5f, 0.0f },  { 0.0f, 0.0f, 1.0f } }
+            { { -0.5f, +0.5f, 0.0f }, { 0.0f, 1.0f } },
+            { { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f } },
+            { { +0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f } },
+            { { +0.5f, +0.5f, 0.0f }, { 1.0f, 1.0f } }
         };
 
         gfx::BufferInputLayout layout{};
         layout
             .add(gfx::EVT_Float, 3)
-            .add(gfx::EVT_Float, 3);
+            .add(gfx::EVT_Float, 2);
 
         vbo = gfx::createStaticVertexBuffer(vertices, &layout);
     }
@@ -53,17 +57,30 @@ int main() {
     gfx::ResourceID ibo{};
     {
         uint32_t indices[] = {
-            0, 1, 2
+            0, 1, 3,
+            1, 2, 3
         };
 
         ibo = gfx::createStaticElementBuffer(indices);
     }
 
-    gfx::ProgramSpec programSpec {
+    gfx::ProgramSpec programSpec{
         .VertexShader = gfx::getOrCreateShader("shaders/test.vert", gfx::EST_VertexShader),
         .FragmentShader = gfx::getOrCreateShader("shaders/test.frag", gfx::EST_FragmentShader)
     };
     gfx::ShaderProgram* program = gfx::getOrCreateShaderProgram(programSpec);
+
+    int w, h, bpp;
+    const stbi_uc* texData = stbi_load("res/container.jpg", &w, &h, &bpp, 4);
+
+    gfx::TextureSpec textureSpec{};
+    textureSpec.Width = w;
+    textureSpec.Height = h;
+    textureSpec.Type = gfx::ETT_Texture2D;
+    textureSpec.Format = gfx::EPF_RGBA8;
+    textureSpec.InitialData = texData;
+
+    gfx::ResourceID texture = gfx::createTexture(textureSpec);
 
     while (gp::pollEvents()) {
 
@@ -71,7 +88,9 @@ int main() {
         gfx::bindElementBuffer(ibo);
 
         gfx::bindShaderProgram(program);
-        gfx::drawElements(gfx::EPT_Triangles, 3);
+        gfx::setUniformTexture(program, "uTexture", texture);
+
+        gfx::drawElements(gfx::EPT_Triangles, 6);
         gfx::present(context);
     }
 

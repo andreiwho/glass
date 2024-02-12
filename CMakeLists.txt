@@ -41,8 +41,13 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
 add_subdirectory(vendor/glfw)
 
-target_link_libraries(glass PRIVATE glad glfw)
+# GLM
+add_library(glm INTERFACE)
+target_include_directories(glm INTERFACE vendor/glm)
+
+target_link_libraries(glass PUBLIC glm PRIVATE glad glfw)
 target_compile_features(glass PUBLIC cxx_std_23)
+
 
 if(MSVC)
     set(GLASS_PROJECTS_VENDOR glad glfw uninstall update_mappings)

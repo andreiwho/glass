@@ -4,6 +4,7 @@
 
 #include "glad/glad.h"
 #include "type_traits"
+#include "hashHelpers.h"
 
 namespace glass::gfx {
     static constexpr GLenum toGLBufferType(EBufferType type) {
@@ -83,9 +84,82 @@ namespace glass::gfx {
         return 0;
     }
 
-    template <class T>
-    inline void hashCombine(uint64_t& seed, const T& v) {
-        std::hash<T> Hasher;
-        seed ^= Hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    static constexpr GLenum toGLTextureType(ETextureType type) {
+        switch (type) {
+            case ETT_Texture1D:
+                return GL_TEXTURE_1D;
+                break;
+            case ETT_Texture2D:
+                return GL_TEXTURE_2D;
+                break;
+            case ETT_Texture3D:
+                return GL_TEXTURE_3D;
+                break;
+            case ETT_TextureCube:
+                return GL_TEXTURE_CUBE_MAP;
+                break;
+        }
+
+        return 0;
+    }
+
+    static constexpr GLenum toGLFormat(EPixelFormat format) {
+        switch (format) {
+            case EPF_RGB8:
+                return GL_RGB;
+            case EPF_RGBA8:
+                return GL_RGBA;
+            case EPF_R11G11B10F:
+                return GL_RGB;
+            case EPF_DepthStencil:
+                return GL_DEPTH_STENCIL;
+            default:
+                break;
+        }
+
+        return 0;
+    }
+
+    static constexpr GLenum toGLInternalFormat(EPixelFormat format) {
+        switch (format) {
+            case EPF_RGB8:
+                return GL_RGB;
+            case EPF_RGBA8:
+                return GL_RGBA8;
+            case EPF_R11G11B10F:
+                return GL_R11F_G11F_B10F;
+            case EPF_DepthStencil:
+                return GL_DEPTH24_STENCIL8;
+        }
+
+        return 0;
+    }
+
+    static constexpr GLenum toGLWrapMode(ETextureWrapMode wrapMode) {
+        switch (wrapMode) {
+            case ETWM_Repeat:
+                return GL_REPEAT;
+                break;
+            case ETWM_MirroredRepeat:
+                return GL_MIRRORED_REPEAT;
+                break;
+            case ETWM_ClampToEdge:
+                return GL_CLAMP_TO_EDGE;
+                break;
+            case ETWM_ClampToBorder:
+                return GL_CLAMP_TO_BORDER;
+                break;
+        }
+        return 0;
+    }
+
+    static constexpr GLenum toGLFilter(ETextureFilter filter) {
+        switch (filter) {
+            case ETF_Linear:
+                return GL_LINEAR;
+            case ETF_Nearest:
+                return GL_NEAREST;            
+        }
+        return 0;
     }
 } // namespace glass::gfx
