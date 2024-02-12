@@ -589,6 +589,10 @@ namespace glass {
 
         /** Get current application time in seconds. */
         GLASS_API double getTime();
+
+        /** Enable or disable cursor */
+        GLASS_API void enableCursor(const Window* window);
+        GLASS_API void disableCursor(const Window* window);
     } // namespace platform
 
     namespace gfx {

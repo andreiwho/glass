@@ -167,4 +167,12 @@ namespace glass::platform {
     double getTime() {
         return glfwGetTime();
     }
+
+    void enableCursor(const Window* window) {
+        glfwSetInputMode(window->getHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    void disableCursor(const Window* window) {
+        glfwSetInputMode(window->getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
 } // namespace glass::platform
