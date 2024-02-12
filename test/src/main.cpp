@@ -38,9 +38,9 @@ int main() {
     gfx::ResourceID vbo{};
     {
         Vertex vertices[] = {
-            { { 0.0f, 0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
-            { { -0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
-            { { 0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f } }
+            { {  0.0f,  0.5f, 0.0f },  { 1.0f, 0.0f, 0.0f } },
+            { { -0.5f, -0.5f, 0.0f },  { 0.0f, 1.0f, 0.0f } },
+            { {  0.5f, -0.5f, 0.0f },  { 0.0f, 0.0f, 1.0f } }
         };
 
         gfx::BufferInputLayout layout{};
