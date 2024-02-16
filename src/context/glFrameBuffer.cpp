@@ -10,13 +10,35 @@ namespace glass::gfx {
 
     FrameBuffer::FrameBuffer(const FrameBufferSpec& spec)
         : m_Spec(spec) {
+        initialize();
+    }
+
+    FrameBuffer::~FrameBuffer() {
+        reset();
+        
+    }
+
+    void FrameBuffer::resize(uint32_t width, uint32_t height) {
+        if (getWidth() == width && getHeight() == height) {
+            return;
+        }
+
+        reset();
+
+        m_Spec.Width = width;
+        m_Spec.Height = height;
+
+        initialize();
+    }
+
+    void FrameBuffer::initialize() {
         glGenFramebuffers(1, &m_Id);
         glBindFramebuffer(GL_FRAMEBUFFER, m_Id);
 
         GLuint drawBuffers[MAX_COLOR_ATTACHMENTS]{};
 
         for (int32_t index = 0; index < MAX_COLOR_ATTACHMENTS; ++index) {
-            if (spec.ColorAttachmentFormats[index] == EPF_Undefined) {
+            if (m_Spec.ColorAttachmentFormats[index] == EPF_Undefined) {
                 break;
             }
 
@@ -25,7 +47,7 @@ namespace glass::gfx {
             texSpec.Type = ETT_Texture2D;
             texSpec.Width = getWidth();
             texSpec.Height = getHeight();
-            texSpec.Format = spec.ColorAttachmentFormats[index];
+            texSpec.Format = m_Spec.ColorAttachmentFormats[index];
             texSpec.GenerateMipmaps = false;
             texSpec.Sampler.MinFilter = ETF_Nearest;
             texSpec.Sampler.MagFilter = ETF_Nearest;
@@ -42,19 +64,19 @@ namespace glass::gfx {
         }
 
         // Create depth attachment
-        if (spec.DepthAttachmentFormat != EPF_Undefined) {
+        if (m_Spec.DepthAttachmentFormat != EPF_Undefined) {
             TextureSpec dsSpec{};
             dsSpec.Type = ETT_Texture2D;
             dsSpec.Width = getWidth();
             dsSpec.Height = getHeight();
-            dsSpec.Format = spec.DepthAttachmentFormat;
+            dsSpec.Format = m_Spec.DepthAttachmentFormat;
             dsSpec.GenerateMipmaps = false;
             dsSpec.Sampler.MinFilter = ETF_Nearest;
             dsSpec.Sampler.MagFilter = ETF_Nearest;
-        
+
             ResourceID dsAttachment = createTexture(dsSpec);
             m_DepthStencilTexture = dsAttachment;
-            
+
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, getTextureID(dsAttachment), 0);
         }
 
@@ -66,11 +88,16 @@ namespace glass::gfx {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    FrameBuffer::~FrameBuffer() {
-        glDeleteFramebuffers(1, &m_Id);
-        
-        for (ResourceID texture : m_ColorAttachments) {
-            destroyTexture(texture);
+    void FrameBuffer::reset() {
+        if (m_Id) {
+            glDeleteFramebuffers(1, &m_Id);
+            m_Id = 0;
+        }
+
+        if (!m_ColorAttachments.empty()) {
+            for (ResourceID texture : m_ColorAttachments) {
+                destroyTexture(texture);
+            }
         }
 
         if (m_DepthStencilTexture != ResourceID::Null) {
@@ -109,4 +136,15 @@ namespace glass::gfx {
         return ResourceID::Null;
     }
 
+    uint32_t getFrameBufferWidth(const FrameBuffer* fb) {
+        return fb->getWidth();
+    }
+
+    uint32_t getFrameBufferHeight(const FrameBuffer* fb) {
+        return fb->getHeight();
+    }
+
+    void resizeFrameBuffer(FrameBuffer* fb, uint32_t width, uint32_t height) {
+        fb->resize(width, height);
+    }
 } // namespace glass::gfx

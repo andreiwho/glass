@@ -207,6 +207,11 @@ int main() {
     while (gp::pollEvents()) {
         glm::vec4 clearColor{ 0.2f, 0.31f, 0.12f, 1.0f };
         
+        const gp::WindowSize windowSize = gp::getWindowSize(window);
+        if (windowSize.Width != gfx::getFrameBufferWidth(fb) || windowSize.Height != gfx::getFrameBufferHeight(fb)) {
+            gfx::resizeFrameBuffer(fb, windowSize.Width, windowSize.Height);
+        }
+
         // Bind custom FrameBuffer
         gfx::setFrameBuffer(fb);
         gfx::clearViewport(gfx::ECF_All, &clearColor);
@@ -218,8 +223,7 @@ int main() {
         gfx::setUniformTexture(program, "uTexture", texture);
 
         // Set projection matrix
-        const gp::WindowSize size = gp::getWindowSize(window);
-        const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), glm::max(1.0f, (float)size.Width), glm::max(1.0f, (float)size.Height), 0.1f, 100.0f);
+        const glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), glm::max(1.0f, (float)windowSize.Width), glm::max(1.0f, (float)windowSize.Height), 0.1f, 100.0f);
 
         /**
          * CAMERA
@@ -237,10 +241,9 @@ int main() {
             .ViewProjection = projection * view,
             .Model = model
         };
+
         writeBufferData(uniformBuffer, &matrices, sizeof(matrices));
         gfx::setUniformBuffer(program, "Matrices", uniformBuffer);
-        // gfx::setUniform(program, "uViewProjection", projection * view);
-        // gfx::setUniform(program, "uModel", model);
 
         gfx::enableDepthTest();
         gfx::setFillMode(gfx::EFM_Solid);
@@ -253,7 +256,6 @@ int main() {
         gfx::clearViewport(gfx::ECF_All, &clearColor);
         gfx::setUniformTexture(program, "uTexture", gfx::getFrameBufferColorAttachmentTexture(fb, 0));
         gfx::drawElements(gfx::EPT_Triangles, (uint32_t)std::size(indices));
-
 
         gfx::present(context);
     }

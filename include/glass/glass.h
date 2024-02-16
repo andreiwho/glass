@@ -1051,6 +1051,12 @@ namespace glass {
 
         GLASS_API ResourceID getFrameBufferDepthStencilAttachment(const FrameBuffer* fb);
 
+        GLASS_API uint32_t getFrameBufferWidth(const FrameBuffer* fb);
+
+        GLASS_API uint32_t getFrameBufferHeight(const FrameBuffer* fb);
+
+        GLASS_API void resizeFrameBuffer(FrameBuffer* fb, uint32_t width, uint32_t height);
+
         /**
          * SHADER API
          */

@@ -8,6 +8,8 @@ namespace glass::gfx {
         FrameBuffer(const FrameBufferSpec& spec);
         ~FrameBuffer();
 
+        void reset();
+
         inline uint32_t getWidth() const { return m_Spec.Width; }
         inline uint32_t getHeight() const { return m_Spec.Height; }
         inline EPixelFormat getColorAttachmentPixelFormat(uint8_t attachmentId) const { return m_Spec.ColorAttachmentFormats[attachmentId]; }
@@ -23,6 +25,11 @@ namespace glass::gfx {
 
         inline uint32_t getId() const { return m_Id; }
 
+        void resize(uint32_t width, uint32_t height);
+
+    private:
+        void initialize();
+
     private:
         uint32_t m_Id{};
         FrameBufferSpec m_Spec{};
@@ -30,7 +37,7 @@ namespace glass::gfx {
         bool m_HasDepthStencil{};
         bool m_IsValid{};
         std::vector<ResourceID> m_ColorAttachments{};
-        ResourceID m_DepthStencilTexture{ResourceID::Null};
+        ResourceID m_DepthStencilTexture{ ResourceID::Null };
     };
 
     void freeFramebufferRegistry();
