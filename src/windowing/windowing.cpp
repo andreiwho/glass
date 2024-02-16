@@ -48,6 +48,16 @@ namespace glass::platform {
         glfwTerminate();
     }
 
+    void requestExit() {
+        if (GPlatformInfo && !GPlatformInfo->Windows.empty()) {
+            for (const auto& window : GPlatformInfo->Windows) {
+                if (window) {
+                    window->close();
+                }
+            }
+        }
+    }
+
     bool pollEvents() {
         static bool isFirstFrame = true;
         const double oldTime = GPlatformInfo->LastTime;

@@ -19,6 +19,7 @@ namespace glass::platform {
 
         void executeCallback(const WindowEvent& event);
         inline GLFWwindow* getHandle() const { return m_Window; }
+        void close();
 
     private:
         WindowSpec m_Spec{};

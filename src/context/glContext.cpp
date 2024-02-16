@@ -244,6 +244,7 @@ namespace glass::gfx {
                     break;
                 case ECM_Front:
                     face = GL_FRONT;
+                    break;
                 case ECM_BackAndFront:
                     face = GL_FRONT_AND_BACK;
                     break;

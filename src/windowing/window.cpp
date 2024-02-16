@@ -257,4 +257,10 @@ namespace glass::platform {
         });
     }
 
+    void Window::close() {
+        glfwSetWindowShouldClose(m_Window, 1);
+        gfx::destroyContext(gfx::getContextForWindow(this));
+        destroyWindow(this);
+    }
+
 } // namespace glass::platform

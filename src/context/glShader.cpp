@@ -10,6 +10,7 @@
 #include "cassert"
 #include "vector"
 #include "glTexture.h"
+#include "glBuffer.h"
 
 namespace glass::gfx {
     static std::string readShaderSource(const std::string& path) {
@@ -88,7 +89,7 @@ namespace glass::gfx {
         uint64_t hash = hash::hash64(name, strlen(name));
         const auto iter = m_UniformLocations.find(hash);
         if (iter != m_UniformLocations.end()) {
-            return (*iter).second;
+            return iter->second;
         }
 
         int32_t location = glGetUniformLocation(m_Id, name);
@@ -99,6 +100,24 @@ namespace glass::gfx {
 
         m_UniformLocations[hash] = location;
         return location;
+    }
+
+    int32_t ShaderProgram::getUniformBlockBinding(const char* name) const {
+        uint64_t hash = hash::hash64(name, strlen(name));
+        if (const auto iter = m_UniformBlockBindings.find(hash); iter != m_UniformBlockBindings.end()) {
+            return iter->second;
+        }
+
+        const uint32_t index = glGetUniformBlockIndex(m_Id, name);
+        if (index != GL_INVALID_INDEX) {
+            const auto binding = m_NextBlockBinding++;
+            glUniformBlockBinding(m_Id, index, binding);
+            m_UniformBlockBindings[hash] = binding;
+            return binding;
+        } else {
+            std::println("GLASS warning: Failed to find uniform block index with name: {}", name);
+            return -1;
+        }
     }
 
     static uint64_t calculateShaderProgramHash(const ProgramSpec& spec) {
@@ -247,13 +266,22 @@ namespace glass::gfx {
     }
 
     void setUniformTexture(const ShaderProgram* program, const char* name, ResourceID id, uint32_t slot) {
-        TextureHandle handle{};
-        handle.Id = id;
-        
-        const GLenum textureType = toGLTextureType(handle.Type);
+        const GLenum textureType = toGLTextureType(getTextureType(id));
         glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(textureType, handle.TextureID);
+        glBindTexture(textureType, getTextureID(id));
         setUniform(program, name, static_cast<int32_t>(slot));
+    }
+
+    void setUniformBuffer(const ShaderProgram* program, const char* name, ResourceID id, uint32_t optBinding) {
+        if (optBinding != INVALID_BINDING) {
+            glBindBufferBase(GL_UNIFORM_BUFFER, optBinding, getBufferID(id));
+        } else {
+            assert(name != nullptr);
+            const auto binding = program->getUniformBlockBinding(name);
+            if (binding != -1) {
+                glBindBufferBase(GL_UNIFORM_BUFFER, binding, getBufferID(id));
+            }
+        }
     }
 
 } // namespace glass::gfx

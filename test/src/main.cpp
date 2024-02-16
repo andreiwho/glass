@@ -15,11 +15,16 @@ struct Vertex {
 
 static float yaw{-90.0f};
 static float pitch{};
+
 static glm::vec3 camPos{ 0.0f, 0.0f, 5.0f };
-static float camSensitivity{ 100.0f };
+static float camSensitivity{ 10.0f };
 static bool isControllingCamera = false;
 static glm::vec3 cameraDirection{};
 static float cameraMoveSpeed = 10.0f;
+
+static constexpr float lerp(float a, float b, float alpha) {
+    return a * (1.0f - alpha) + b * alpha;
+}
 
 void controlCameraPos() {
     const glm::vec3 up{ 0.0f, 1.0f, 0.0f };
@@ -41,6 +46,14 @@ void controlCameraPos() {
     if (gp::isKeyDown(gp::EKeyCode::D)) {
         camPos -= right * cameraMoveSpeed * (float)gp::getDeltaTime();
     }
+
+    if (gp::isKeyDown(gp::EKeyCode::E)) {
+        camPos -= up * cameraMoveSpeed * (float)gp::getDeltaTime();
+    }
+
+    if (gp::isKeyDown(gp::EKeyCode::Q)) {
+        camPos += up * cameraMoveSpeed * (float)gp::getDeltaTime();
+    }
 }
 
 int main() {
@@ -50,7 +63,7 @@ int main() {
     spec.Size = { 1280, 720 };
     spec.Title = "Hello, Glass";
     spec.Resizable = true;
-    spec.Fullscreen = true;
+    spec.Fullscreen = false;
     spec.EventCallback = [](const gp::WindowEvent& event) {
         gp::EventDispatcher dispatcher{ event };
         dispatcher.dispatch(+[](const gp::MouseButtonPressEvent& event) {
@@ -76,10 +89,16 @@ int main() {
                     pitch = -89.0f;
             }
         });
+
+        dispatcher.dispatch(+[](const gp::KeyPressEvent& event) {
+            if (event.KeyCode == gp::EKeyCode::Escape) {
+                gp::requestExit();
+            }
+        });
     };
 
     gp::Window* window = gp::createWindow(spec);
-    gfx::Context* context = gfx::createContext({ window });
+    gfx::Context* context = gfx::createContext({ window, true });
 
     gfx::ResourceID vbo{};
     {
@@ -171,6 +190,13 @@ int main() {
 
     gfx::ResourceID texture = gfx::createTexture(textureSpec);
 
+    struct Matrices {
+        glm::mat4 ViewProjection{ 1 };
+        glm::mat4 Model{ 1 };
+    };
+
+    gfx::ResourceID uniformBuffer = gfx::createUniformBuffer(Matrices{});
+
     while (gp::pollEvents()) {
         glm::vec4 clearColor{ 0.2f, 0.31f, 0.12f, 1.0f };
         gfx::clearViewport(gfx::ECF_All, &clearColor);
@@ -198,8 +224,14 @@ int main() {
         const glm::mat4 view = glm::lookAt(camPos, camPos + cameraFront, glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 model = glm::rotate(glm::mat4(1.0f), (float)gp::getTime(), glm::vec3(1.0f, 1.0f, 1.0f));
 
-        gfx::setUniform(program, "uViewProjection", projection * view);
-        gfx::setUniform(program, "uModel", model);
+        Matrices matrices{
+            .ViewProjection = projection * view,
+            .Model = model
+        };
+        writeBufferData(uniformBuffer, &matrices, sizeof(matrices));
+        gfx::setUniformBuffer(program, "Matrices", uniformBuffer);
+        // gfx::setUniform(program, "uViewProjection", projection * view);
+        // gfx::setUniform(program, "uModel", model);
 
         gfx::enableDepthTest();
         gfx::setFillMode(gfx::EFM_Solid);

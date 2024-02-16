@@ -45,7 +45,7 @@ namespace glass::gfx {
     //}
 
     ResourceID createTexture(const TextureSpec& spec) {
-        TextureHandle outHandle{};
+        TextureHandle outHandle{ ResourceID::Null };
         outHandle.Id = 0;
         outHandle.Type = spec.Type;
         outHandle.Format = spec.Format;
@@ -66,7 +66,7 @@ namespace glass::gfx {
             case ETT_TextureCube:
                 //initAsCubeTexture(outHandle.TextureID, spec);
                 assert(false && "Cube textures are currently unsupported");
-                return 0;
+                return ResourceID::Null;
                 break;
         }
 
@@ -88,6 +88,6 @@ namespace glass::gfx {
         }
         glBindTexture(textureType, 0);
 
-        return outHandle.Id;
+        return static_cast<ResourceID>(outHandle.Id);
     }
 }

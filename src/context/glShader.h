@@ -22,10 +22,13 @@ namespace glass::gfx {
 
         inline uint32_t getId() const { return m_Id; }
         int32_t getUniformLocation(const char* name) const;
+        int32_t getUniformBlockBinding(const char* name) const;
 
     private:
         uint32_t m_Id{};
         mutable std::unordered_map<uint64_t, int32_t> m_UniformLocations{};
+        mutable std::unordered_map<uint64_t, int32_t> m_UniformBlockBindings{};
+        mutable uint32_t m_NextBlockBinding{0};
     };
 
     void terminateShaderLibrary();

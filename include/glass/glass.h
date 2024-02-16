@@ -42,6 +42,11 @@ namespace glass {
          */
         GLASS_API bool pollEvents();
 
+        /**
+         * @brief
+         */
+        GLASS_API void requestExit();
+
         class Window;
 
         struct WindowSize {
@@ -596,7 +601,10 @@ namespace glass {
     } // namespace platform
 
     namespace gfx {
-        using ResourceID = uint64_t;
+        enum class ResourceID : uint64_t { Null = 0 };
+
+        static constexpr ResourceID NULL_RESOURCE = ResourceID::Null;
+        static constexpr uint32_t INVALID_BINDING = UINT32_MAX;
 
         struct ContextSpec {
             /** Window to create the context for */
@@ -893,6 +901,28 @@ namespace glass {
             return createBuffer(spec);
         }
 
+        template<typename StructType>
+        ResourceID createUniformBuffer(const StructType& data) {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Uniform;
+            spec.Mutability = gfx::EBM_Dynamic;
+            spec.StrideInBytes = sizeof(StructType);
+            spec.SizeInBytes = sizeof(StructType);
+            spec.InitialData = &data;
+            spec.InitialDataSize = sizeof(StructType);
+            return createBuffer(spec);
+        }
+
+        template <typename StructType>
+        ResourceID createUniformBuffer() {
+            gfx::BufferSpec spec{};
+            spec.BufferType = gfx::EBT_Uniform;
+            spec.Mutability = gfx::EBM_Dynamic;
+            spec.StrideInBytes = sizeof(StructType);
+            spec.SizeInBytes = sizeof(StructType);
+            return createBuffer(spec);
+        }
+
         /**
          * @brief Writes buffer data
          * @param buffer the buffer to update
@@ -1047,6 +1077,14 @@ namespace glass {
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat4& uniform, bool transpose = false);
 
         GLASS_API void setUniformTexture(const ShaderProgram* program, const char* name, ResourceID id, uint32_t slot = 0);
+        /**
+         * @brief Bind a uniform buffer to the pipeline
+         * @param program An instance of a shader program to use for binding lookup
+         * @param name Name of the binding in the GLSL code (can be null if optBinding is specified).
+         * @param id Id of the buffer to bind
+         * @param optBinding An optional binding slot, can be INVALID_BINDING if a name is specified.
+         */
+        GLASS_API void setUniformBuffer(const ShaderProgram* program, const char* name, ResourceID id, uint32_t optBinding = INVALID_BINDING);
 
         /**
          * DRAWING

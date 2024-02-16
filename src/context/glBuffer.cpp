@@ -6,15 +6,6 @@
 #include "cassert"
 
 namespace glass::gfx {
-    union BufferHandle {
-        uint64_t ID;
-        struct {
-            uint16_t VAOID;
-            EBufferType BufferType;
-            uint32_t BufferID;
-        };
-    };
-
     static uint16_t initAsVertexArray(const BufferSpec& spec, uint32_t bufferID) {
         uint32_t outID{};
         glGenVertexArrays(1, &outID);
@@ -53,8 +44,7 @@ namespace glass::gfx {
     }
 
     ResourceID createBuffer(const BufferSpec& spec) {
-        BufferHandle handle{};
-        handle.ID = 0;
+        BufferHandle handle{ ResourceID::Null };
         handle.BufferType = spec.BufferType;
 
         uint32_t bufferID{};
@@ -74,12 +64,11 @@ namespace glass::gfx {
             handle.VAOID = initAsVertexArray(spec, handle.BufferID);
         }
 
-        return handle.ID;
+        return static_cast<ResourceID>(handle.ID);
     }
 
     void writeBufferData(ResourceID buffer, const void* data, uint64_t dataSize, uint64_t offset) {
-        BufferHandle handle{};
-        handle.ID = buffer;
+        BufferHandle handle{buffer};
         const GLenum bufferType = toGLBufferType(handle.BufferType);
 
         glBindBuffer(bufferType, handle.BufferID);
@@ -88,8 +77,7 @@ namespace glass::gfx {
     }
 
     void destroyBuffer(ResourceID buffer) {
-        BufferHandle handle{};
-        handle.ID = buffer;
+        BufferHandle handle{buffer};
 
         if (handle.BufferType == EBT_Vertex) {
             uint32_t vao = handle.VAOID;
@@ -101,14 +89,12 @@ namespace glass::gfx {
     }
 
     void bindVertexBuffer(ResourceID buffer) {
-        BufferHandle handle{};
-        handle.ID = buffer;
+        BufferHandle handle{buffer};
         glBindVertexArray(handle.VAOID);
     }
 
     void bindElementBuffer(ResourceID buffer) {
-        BufferHandle handle{};
-        handle.ID = buffer;
+        BufferHandle handle{buffer};
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.BufferID);
     }
 } // namespace glass::gfx
