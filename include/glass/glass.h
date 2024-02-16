@@ -601,7 +601,9 @@ namespace glass {
     } // namespace platform
 
     namespace gfx {
-        enum class ResourceID : uint64_t { Null = 0 };
+        enum class ResourceID : uint64_t {
+            Null = 0
+        };
 
         static constexpr ResourceID NULL_RESOURCE = ResourceID::Null;
         static constexpr uint32_t INVALID_BINDING = UINT32_MAX;
@@ -661,16 +663,16 @@ namespace glass {
         /** Viewport struct to determin draw area. */
         struct Viewport2D {
             /** Top left corner X of draw area */
-            int32_t X{0};
+            int32_t X{ 0 };
 
             /** Top left corner Y of draw area */
-            int32_t Y{0};
+            int32_t Y{ 0 };
 
             /** Width of draw area. Leave at 0 to deduce from window */
-            int32_t Width{0};
+            int32_t Width{ 0 };
 
             /** Height of draw area. Leave at 0 to deduce from window */
-            int32_t Height{0};
+            int32_t Height{ 0 };
         };
 
         /**
@@ -713,7 +715,6 @@ namespace glass {
             EFM_Solid,
             EFM_Wireframe,
         };
-
 
         /**
          * @brief Set fill mode
@@ -901,7 +902,7 @@ namespace glass {
             return createBuffer(spec);
         }
 
-        template<typename StructType>
+        template <typename StructType>
         ResourceID createUniformBuffer(const StructType& data) {
             gfx::BufferSpec spec{};
             spec.BufferType = gfx::EBT_Uniform;
@@ -955,6 +956,9 @@ namespace glass {
 
         /** Pixel format of the texture */
         enum EPixelFormat : uint16_t {
+            /** Invalid pixel format */
+            EPF_Undefined,
+
             /** RGB 24 bit format */
             EPF_RGB8,
 
@@ -994,8 +998,8 @@ namespace glass {
 
         /** Specification for texture sampler */
         struct SamplerSpec {
-            ETextureFilter MinFilter{ETF_Linear};
-            ETextureFilter MagFilter{ETF_Linear};
+            ETextureFilter MinFilter{ ETF_Linear };
+            ETextureFilter MagFilter{ ETF_Linear };
             ETextureWrapMode WrapModeS{ ETWM_ClampToEdge };
             ETextureWrapMode WrapModeT{ ETWM_ClampToEdge };
             ETextureWrapMode WrapModeU{ ETWM_ClampToEdge };
@@ -1003,18 +1007,49 @@ namespace glass {
 
         /** Specification for texture creation */
         struct TextureSpec {
-            ETextureType Type{ETT_Texture2D};
-            EPixelFormat Format{EPF_RGBA8};
-            int32_t Width{1};
-            int32_t Height{1};
-            int32_t Depth{1};
-            bool GenerateMipmaps{true};
+            ETextureType Type{ ETT_Texture2D };
+            EPixelFormat Format{ EPF_RGBA8 };
+            int32_t Width{ 1 };
+            int32_t Height{ 1 };
+            int32_t Depth{ 1 };
+            bool GenerateMipmaps{ true };
             SamplerSpec Sampler{};
 
             const void* InitialData{};
         };
 
         GLASS_API ResourceID createTexture(const TextureSpec& spec);
+
+        GLASS_API void destroyTexture(ResourceID texture);
+
+        /**
+         * FRAMEBUFFERS
+         */
+        static constexpr auto MAX_COLOR_ATTACHMENTS = 8u;
+
+        struct FrameBufferSpec {
+            /** The width of the framebuffer */
+            int32_t Width{};
+
+            /** The height of the framebuffer */
+            int32_t Height{};
+
+            /** Color attachment formats. 8 possible. If AttachmentFormat is not EPF_Undefined the texture will be created. */
+            EPixelFormat ColorAttachmentFormats[MAX_COLOR_ATTACHMENTS]{};
+            EPixelFormat DepthAttachmentFormat = EPF_Undefined;
+        };
+
+        class FrameBuffer;
+
+        GLASS_API FrameBuffer* createFrameBuffer(const FrameBufferSpec& spec);
+        GLASS_API void destroyFrameBuffer(FrameBuffer* frameBuffer);
+
+        /** Bind framebuffer to the pipeline. Use nullptr to bind default framebuffer. */
+        GLASS_API void setFrameBuffer(FrameBuffer* frameBuffer, bool updateViewport = true);
+
+        GLASS_API ResourceID getFrameBufferColorAttachmentTexture(const FrameBuffer* fb, uint8_t index);
+
+        GLASS_API ResourceID getFrameBufferDepthStencilAttachment(const FrameBuffer* fb);
 
         /**
          * SHADER API
@@ -1072,7 +1107,7 @@ namespace glass {
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::uvec2 uniform);
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::uvec3 uniform);
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, glm::uvec4 uniform);
-        
+
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat3& uniform, bool transpose = false);
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat4& uniform, bool transpose = false);
 

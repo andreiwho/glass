@@ -13,8 +13,12 @@ namespace glass::gfx {
 
         void setVSyncEnabled(bool enabled);
 
+        void bindFrameBuffer(FrameBuffer* frameBuffer, bool updateViewport = false) const;
+
     private:
         const platform::Window* m_Window{};
         bool m_VSyncEnabled = false;
+
+        mutable FrameBuffer* m_BoundFrameBuffer{};
     };
 } // namespace glass::gfx

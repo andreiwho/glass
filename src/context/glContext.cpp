@@ -6,6 +6,7 @@
 #include "cassert"
 #include "ranges"
 #include "glShader.h"
+#include "glFrameBuffer.h"
 
 namespace glass::gfx {
     const Context* GCurrentContext = nullptr;
@@ -99,6 +100,7 @@ namespace glass::gfx {
 
     void shutdown() {
         GContextData.reset();
+        freeFramebufferRegistry();
         terminateShaderLibrary();
         GContextData = nullptr;
     }
@@ -193,6 +195,25 @@ namespace glass::gfx {
 
     void Context::setVSyncEnabled(bool enabled) {
         m_VSyncEnabled = enabled;
+    }
+
+    void Context::bindFrameBuffer(FrameBuffer* frameBuffer, bool updateViewport) const {
+        if (m_BoundFrameBuffer != frameBuffer) {
+            m_BoundFrameBuffer = frameBuffer;
+
+            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer ? frameBuffer->getId() : 0);
+
+            if (updateViewport) {
+                if (frameBuffer) {
+                    Viewport2D vp{};
+                    vp.Width = frameBuffer->getWidth();
+                    vp.Height = frameBuffer->getHeight();
+                    setViewport(vp);
+                } else {
+                    setViewport();
+                }
+            }
+        }
     }
 
     void makeContextCurrent(const Context* context) {
@@ -311,6 +332,12 @@ namespace glass::gfx {
         }
 
         glDrawElements(glTop, static_cast<GLsizei>(indexCount), glIndexType, nullptr);
+    }
+
+    void setFrameBuffer(FrameBuffer* frameBuffer, bool updateViewport) {
+        if (GCurrentContext) {
+            GCurrentContext->bindFrameBuffer(frameBuffer, updateViewport);
+        }
     }
 
 } // namespace glass::gfx

@@ -196,11 +196,20 @@ int main() {
     };
 
     gfx::ResourceID uniformBuffer = gfx::createUniformBuffer(Matrices{});
+    
+    gfx::FrameBufferSpec fbSpec{};
+    fbSpec.Width = gp::getWindowSize(window).Width;
+    fbSpec.Height = gp::getWindowSize(window).Height;
+    fbSpec.ColorAttachmentFormats[0] = gfx::EPF_RGBA8;
+    fbSpec.DepthAttachmentFormat = glass::gfx::EPF_DepthStencil;
+    gfx::FrameBuffer* fb = gfx::createFrameBuffer(fbSpec);
 
     while (gp::pollEvents()) {
         glm::vec4 clearColor{ 0.2f, 0.31f, 0.12f, 1.0f };
+        
+        // Bind custom FrameBuffer
+        gfx::setFrameBuffer(fb);
         gfx::clearViewport(gfx::ECF_All, &clearColor);
-        gfx::setViewport();
 
         gfx::bindVertexBuffer(vbo);
         gfx::bindElementBuffer(ibo);
@@ -238,6 +247,14 @@ int main() {
         gfx::setCullMode(gfx::ECM_Back);
 
         gfx::drawElements(gfx::EPT_Triangles, (uint32_t)std::size(indices));
+
+        // Draw back to the default framebuffer
+        gfx::setFrameBuffer(nullptr);
+        gfx::clearViewport(gfx::ECF_All, &clearColor);
+        gfx::setUniformTexture(program, "uTexture", gfx::getFrameBufferColorAttachmentTexture(fb, 0));
+        gfx::drawElements(gfx::EPT_Triangles, (uint32_t)std::size(indices));
+
+
         gfx::present(context);
     }
 

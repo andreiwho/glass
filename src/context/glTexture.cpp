@@ -90,4 +90,11 @@ namespace glass::gfx {
 
         return static_cast<ResourceID>(outHandle.Id);
     }
+
+    void destroyTexture(ResourceID id) {
+        uint32_t texID = getTextureID(id);
+        if (texID != 0) {
+            glDeleteTextures(1, &texID);
+        }
+    }
 }
