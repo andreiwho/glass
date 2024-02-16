@@ -1027,6 +1027,7 @@ namespace glass {
          */
         static constexpr auto MAX_COLOR_ATTACHMENTS = 8u;
 
+        /** Specification for the frame buffer */
         struct FrameBufferSpec {
             /** The width of the framebuffer */
             int32_t Width{};
@@ -1036,6 +1037,8 @@ namespace glass {
 
             /** Color attachment formats. 8 possible. If AttachmentFormat is not EPF_Undefined the texture will be created. */
             EPixelFormat ColorAttachmentFormats[MAX_COLOR_ATTACHMENTS]{};
+
+            /** Pixel format of the depth stencil attachment. If Attachment format is not EPF_Undefined the texture will be created. */
             EPixelFormat DepthAttachmentFormat = EPF_Undefined;
         };
 
@@ -1047,14 +1050,44 @@ namespace glass {
         /** Bind framebuffer to the pipeline. Use nullptr to bind default framebuffer. */
         GLASS_API void setFrameBuffer(FrameBuffer* frameBuffer, bool updateViewport = true);
 
+        /**
+         * @brief Retrieve frame buffer color attachment if it exists.
+         * @param fb FrameBuffer to get the texture from
+         * @param index The index of the color attachment
+         * @return A valid texture id if it exists, ResourceID::Null otherwise
+         */
         GLASS_API ResourceID getFrameBufferColorAttachmentTexture(const FrameBuffer* fb, uint8_t index);
 
+        /**
+         * @brief Retrieve frame buffer depth stencil attachment texture if it exists.
+         * @param fb FrameBuffer to get the texture from
+         * @return A valid texture id if it exists, ResourceID::Null otherwise
+         */
         GLASS_API ResourceID getFrameBufferDepthStencilAttachment(const FrameBuffer* fb);
 
+        /**
+         * @brief Retrieve frame buffer width.
+         * @param fb A valid frame buffer handle. Cannot be null.
+         * @return Width of the frame buffer
+         */
         GLASS_API uint32_t getFrameBufferWidth(const FrameBuffer* fb);
 
+        /**
+         * @brief Retrieve frame buffer height.
+         * @param fb A valid frame buffer handle. Cannot be null.
+         * @return Height of the frame buffer
+         */
         GLASS_API uint32_t getFrameBufferHeight(const FrameBuffer* fb);
 
+        /**
+         * @brief Resize the frame buffer.
+         * @param fb A valid frame buffer handle
+         * @param width New width of the frame buffer
+         * @param height New height of the frame buffer
+         * 
+         * Resizing of the frame buffer happens only if the width or height of the frame buffer are different from specified values.
+         * New textures are created then.
+         */
         GLASS_API void resizeFrameBuffer(FrameBuffer* fb, uint32_t width, uint32_t height);
 
         /**
@@ -1117,7 +1150,14 @@ namespace glass {
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat3& uniform, bool transpose = false);
         GLASS_API void setUniform(const ShaderProgram* program, const char* name, const glm::mat4& uniform, bool transpose = false);
 
-        GLASS_API void setUniformTexture(const ShaderProgram* program, const char* name, ResourceID id, uint32_t slot = 0);
+        /**
+         * @brief Bind texture to the shader program uniform slot.
+         * @param program Shader program to bind the texture to
+         * @param name The name of the uniform
+         * @param id A texture to bind to the uniform slot
+         * @param slot (optional) binding slot. For binding multiple textures.
+         */
+        GLASS_API void setUniformTexture(const ShaderProgram* program, const char* name, ResourceID texture, uint32_t slot = 0);
         /**
          * @brief Bind a uniform buffer to the pipeline
          * @param program An instance of a shader program to use for binding lookup
@@ -1125,7 +1165,7 @@ namespace glass {
          * @param id Id of the buffer to bind
          * @param optBinding An optional binding slot, can be INVALID_BINDING if a name is specified.
          */
-        GLASS_API void setUniformBuffer(const ShaderProgram* program, const char* name, ResourceID id, uint32_t optBinding = INVALID_BINDING);
+        GLASS_API void setUniformBuffer(const ShaderProgram* program, const char* name, ResourceID buffer, uint32_t optBinding = INVALID_BINDING);
 
         /**
          * DRAWING
