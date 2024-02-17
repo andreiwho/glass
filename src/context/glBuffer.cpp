@@ -97,4 +97,8 @@ namespace glass::gfx {
         BufferHandle handle{buffer};
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.BufferID);
     }
+
+    uint32_t getOpenGLBufferID(ResourceID buffer) {
+        return getBufferID(buffer);
+    }
 } // namespace glass::gfx

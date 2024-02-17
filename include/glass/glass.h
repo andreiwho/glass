@@ -841,6 +841,8 @@ namespace glass {
 
         GLASS_API void destroyBuffer(ResourceID buffer);
 
+        GLASS_API uint32_t getOpenGLBufferID(ResourceID buffer);
+
         /**
          * Buffer helpers
          */
@@ -1021,6 +1023,8 @@ namespace glass {
         };
 
         GLASS_API ResourceID createTexture(const TextureSpec& spec);
+
+        GLASS_API uint32_t getOpenGLTextureID(ResourceID texture);
 
         GLASS_API void destroyTexture(ResourceID texture);
 

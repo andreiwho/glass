@@ -97,4 +97,8 @@ namespace glass::gfx {
             glDeleteTextures(1, &texID);
         }
     }
+
+    uint32_t getOpenGLTextureID(ResourceID texture) {
+        return getTextureID(texture);
+    }
 }
