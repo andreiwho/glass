@@ -64,6 +64,7 @@ int main() {
     spec.Title = "Hello, Glass";
     spec.Resizable = true;
     spec.Fullscreen = false;
+
     spec.EventCallback = [](const gp::WindowEvent& event) {
         gp::EventDispatcher dispatcher{ event };
         dispatcher.dispatch(+[](const gp::MouseButtonPressEvent& event) {
@@ -72,12 +73,14 @@ int main() {
                 isControllingCamera = true;
             }
         });
+
         dispatcher.dispatch(+[](const gp::MouseButtonReleaseEvent& event) {
             if (event.Button == gp::EMouseButton::Right) {
                 gp::enableCursor(event.EventWindow);
                 isControllingCamera = false;
             }
         });
+
         dispatcher.dispatch(+[](const gp::MouseMoveEvent& event) {
             if (isControllingCamera) {
                 yaw += static_cast<float>(gp::getMouseOffset().X * camSensitivity * gp::getDeltaTime());
@@ -179,7 +182,7 @@ int main() {
     gfx::ShaderProgram* program = gfx::getOrCreateShaderProgram(programSpec);
 
     int w, h, bpp;
-    const stbi_uc* texData = stbi_load("res/container.jpg", &w, &h, &bpp, 4);
+    stbi_uc* texData = stbi_load("res/container.jpg", &w, &h, &bpp, 4);
 
     gfx::TextureSpec textureSpec{};
     textureSpec.Width = w;
@@ -189,6 +192,7 @@ int main() {
     textureSpec.InitialData = texData;
 
     gfx::ResourceID texture = gfx::createTexture(textureSpec);
+    stbi_image_free(texData);
 
     struct Matrices {
         glm::mat4 ViewProjection{ 1 };
