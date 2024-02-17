@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER glassProj/vendor/cmake)
 
 project(glass)
 
