@@ -601,6 +601,8 @@ namespace glass {
     } // namespace platform
 
     namespace gfx {
+        GLASS_API extern bool GUsesGFX;
+
         enum class ResourceID : uint64_t {
             Null = 0
         };

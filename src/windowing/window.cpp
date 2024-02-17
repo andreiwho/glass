@@ -250,7 +250,9 @@ namespace glass::platform {
 
             myWindow->executeCallback(event);
 
-            gfx::destroyContext(gfx::getContextForWindow(myWindow));
+            if (gfx::GUsesGFX) {
+                gfx::destroyContext(gfx::getContextForWindow(myWindow));
+            }
 
             // Send event to platfom
             destroyWindow(myWindow);
