@@ -118,6 +118,15 @@ namespace glass::gfx {
         return context.get();
     }
 
+    Context* getCurrentContext() {
+        return const_cast<Context*>(GCurrentContext);
+    }
+
+
+    platform::Window* getContextWindow(const Context* context) {
+        return context->getWindow();
+    }
+
     void destroyContext(const Context* context) {
         assert(GContextData && "Graphics layer was not initialized. Did you forget to call glass::gfx::init()?");
         GContextData->destroyContext(context);

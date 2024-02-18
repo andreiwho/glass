@@ -624,6 +624,10 @@ namespace glass {
         /** Graphics context. This holds a window and manages context resources. */
         class Context;
 
+        GLASS_API Context* getCurrentContext();
+
+        GLASS_API platform::Window* getContextWindow(const Context* context);
+
         /**
          * @brief Create a graphics context handle.
          * @param spec The specification of the graphics context
@@ -1093,7 +1097,7 @@ namespace glass {
          * @param fb A valid frame buffer handle
          * @param width New width of the frame buffer
          * @param height New height of the frame buffer
-         * 
+         *
          * Resizing of the frame buffer happens only if the width or height of the frame buffer are different from specified values.
          * New textures are created then.
          */
