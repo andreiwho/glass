@@ -265,4 +265,8 @@ namespace glass::platform {
         destroyWindow(this);
     }
 
+    GLFWwindow* getWindowHandle(const Window* window) {
+        return window->getHandle();
+    }
+
 } // namespace glass::platform

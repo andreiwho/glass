@@ -24,6 +24,7 @@
     #define GLASS_API
 #endif
 
+typedef struct GLFWwindow GLFWwindow;
 namespace glass {
     namespace platform {
         /**
@@ -88,6 +89,8 @@ namespace glass {
             /** Should window be focused on create */
             bool Focused : 2 = true;
         };
+
+        GLASS_API GLFWwindow* getWindowHandle(const Window* window);
 
         enum class EWindowEventType {
             WindowResize,
