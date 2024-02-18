@@ -13,7 +13,12 @@ namespace glass::gfx {
     bool GUsesGFX = false;
 
     static void glDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-        std::string_view messageSource{};
+        #ifndef GLASS_ENABLE_VERBOSE_OPENGL_LOGGING
+        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+            return;
+        }
+        #endif
+        std::string_view messageSource{};        
         switch (source) {
             case GL_DEBUG_SOURCE_API:
                 messageSource = "API";
