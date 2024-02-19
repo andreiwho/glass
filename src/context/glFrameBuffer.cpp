@@ -4,6 +4,7 @@
 #include "glTexture.h"
 
 #include "print"
+#include "glInternal.h"
 
 namespace glass::gfx {
     static std::vector<std::shared_ptr<FrameBuffer>> GFrameBufferRegistry{};
@@ -15,7 +16,6 @@ namespace glass::gfx {
 
     FrameBuffer::~FrameBuffer() {
         reset();
-        
     }
 
     void FrameBuffer::resize(uint32_t width, uint32_t height) {
@@ -32,8 +32,8 @@ namespace glass::gfx {
     }
 
     void FrameBuffer::initialize() {
-        glGenFramebuffers(1, &m_Id);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_Id);
+        GLCALL(glGenFramebuffers(1, &m_Id));
+        GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, m_Id));
 
         GLuint drawBuffers[MAX_COLOR_ATTACHMENTS]{};
 
@@ -55,12 +55,12 @@ namespace glass::gfx {
             ResourceID attachment = createTexture(texSpec);
             m_ColorAttachments.push_back(attachment);
 
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, getTextureID(attachment), 0);
+            GLCALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, getTextureID(attachment), 0));
             drawBuffers[index] = GL_COLOR_ATTACHMENT0 + index;
         }
 
         if (!m_ColorAttachments.empty()) {
-            glDrawBuffers(static_cast<GLsizei>(m_ColorAttachments.size()), drawBuffers);
+            GLCALL(glDrawBuffers(static_cast<GLsizei>(m_ColorAttachments.size()), drawBuffers));
         }
 
         // Create depth attachment
@@ -77,7 +77,7 @@ namespace glass::gfx {
             ResourceID dsAttachment = createTexture(dsSpec);
             m_DepthStencilTexture = dsAttachment;
 
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, getTextureID(dsAttachment), 0);
+            GLCALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, getTextureID(dsAttachment), 0));
         }
 
         m_IsValid = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
@@ -85,12 +85,12 @@ namespace glass::gfx {
             std::println("GLASS error: Tried to create a framebuffer, but it is not complete. Check if it has at least color or depth attachments.");
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     }
 
     void FrameBuffer::reset() {
         if (m_Id) {
-            glDeleteFramebuffers(1, &m_Id);
+            GLCALL(glDeleteFramebuffers(1, &m_Id));
             m_Id = 0;
         }
 
@@ -98,6 +98,7 @@ namespace glass::gfx {
             for (ResourceID texture : m_ColorAttachments) {
                 destroyTexture(texture);
             }
+            m_ColorAttachments.clear();
         }
 
         if (m_DepthStencilTexture != ResourceID::Null) {

@@ -5,42 +5,24 @@
 
 namespace glass::gfx {
     void initAs1DTexture(uint32_t id, const TextureSpec& spec) {
-        glBindTexture(GL_TEXTURE_1D, id);
-
-        if (spec.InitialData) {
-            glTexImage1D(GL_TEXTURE_1D, 0, toGLInternalFormat(spec.Format), spec.Width, 0, toGLFormat(spec.Format), GL_UNSIGNED_BYTE, spec.InitialData);
-        } else {
-            glTexStorage1D(GL_TEXTURE_1D, 1, toGLInternalFormat(spec.Format), spec.Width);
-        }
-
-        glBindTexture(GL_TEXTURE_1D, 0);
+        GLCALL(glBindTexture(GL_TEXTURE_1D, id));
+        GLCALL(glTexImage1D(GL_TEXTURE_1D, 0, toGLInternalFormat(spec.Format), spec.Width, 0, toGLFormat(spec.Format), toGLDataTypeFromFormat(spec.Format), spec.InitialData));
+        GLCALL(glBindTexture(GL_TEXTURE_1D, 0));
     }
 
     void initAs2DTexture(uint32_t id, const TextureSpec& spec) {
-        glBindTexture(GL_TEXTURE_2D, id);
-
-        if (spec.InitialData) {
-            glTexImage2D(GL_TEXTURE_2D, 0, toGLInternalFormat(spec.Format), spec.Width, spec.Height, 0, toGLFormat(spec.Format), GL_UNSIGNED_BYTE, spec.InitialData);
-        } else {
-            glTexStorage2D(GL_TEXTURE_2D, 1, toGLInternalFormat(spec.Format), spec.Width, spec.Height);
-        }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
+        GLCALL(glBindTexture(GL_TEXTURE_2D, id));
+        GLCALL(glTexImage2D(GL_TEXTURE_2D, 0, toGLInternalFormat(spec.Format), spec.Width, spec.Height, 0, toGLFormat(spec.Format), toGLDataTypeFromFormat(spec.Format), spec.InitialData));
+        GLCALL(glBindTexture(GL_TEXTURE_2D, 0));
     }
 
     void initAs3DTexture(uint32_t id, const TextureSpec& spec) {
-        glBindTexture(GL_TEXTURE_3D, id);
-
-        if (spec.InitialData) {
-            glTexImage3D(GL_TEXTURE_3D, 0, toGLInternalFormat(spec.Format), spec.Width, spec.Height, spec.Depth, 0, toGLFormat(spec.Format), GL_UNSIGNED_BYTE, spec.InitialData);
-        } else {
-            glTexStorage3D(GL_TEXTURE_3D, 1, toGLInternalFormat(spec.Format), spec.Width, spec.Height, spec.Depth);
-        }
-
-        glBindTexture(GL_TEXTURE_3D, 0);
+        GLCALL(glBindTexture(GL_TEXTURE_3D, id));
+        GLCALL(glTexImage3D(GL_TEXTURE_3D, 0, toGLInternalFormat(spec.Format), spec.Width, spec.Height, spec.Depth, 0, toGLFormat(spec.Format), toGLDataTypeFromFormat(spec.Format), spec.InitialData));
+        GLCALL(glBindTexture(GL_TEXTURE_3D, 0));
     }
 
-    //void initAsCubeTexture(uint32_t id, const TextureSpec& spec) {
+    // void initAsCubeTexture(uint32_t id, const TextureSpec& spec) {
 
     //}
 
@@ -50,7 +32,7 @@ namespace glass::gfx {
         outHandle.Type = spec.Type;
         outHandle.Format = spec.Format;
 
-        glGenTextures(1, &outHandle.TextureID);
+        GLCALL(glGenTextures(1, &outHandle.TextureID));
         const GLenum textureType = toGLTextureType(spec.Type);
 
         switch (spec.Type) {
@@ -64,29 +46,29 @@ namespace glass::gfx {
                 initAs3DTexture(outHandle.TextureID, spec);
                 break;
             case ETT_TextureCube:
-                //initAsCubeTexture(outHandle.TextureID, spec);
+                // initAsCubeTexture(outHandle.TextureID, spec);
                 assert(false && "Cube textures are currently unsupported");
                 return ResourceID::Null;
                 break;
         }
 
-        glBindTexture(textureType, outHandle.TextureID);
-        glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, toGLFilter(spec.Sampler.MinFilter));
-        glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, toGLFilter(spec.Sampler.MagFilter));
-        glTexParameteri(textureType, GL_TEXTURE_WRAP_S, toGLWrapMode(spec.Sampler.WrapModeS));
+        GLCALL(glBindTexture(textureType, outHandle.TextureID));
+        GLCALL(glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, toGLFilter(spec.Sampler.MinFilter)));
+        GLCALL(glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, toGLFilter(spec.Sampler.MagFilter)));
+        GLCALL(glTexParameteri(textureType, GL_TEXTURE_WRAP_S, toGLWrapMode(spec.Sampler.WrapModeS)));
 
         if (spec.Type > ETT_Texture1D) {
-            glTexParameteri(textureType, GL_TEXTURE_WRAP_T, toGLWrapMode(spec.Sampler.WrapModeT));
+            GLCALL(glTexParameteri(textureType, GL_TEXTURE_WRAP_T, toGLWrapMode(spec.Sampler.WrapModeT)));
         }
 
         if (spec.Type == ETT_Texture3D) {
-            glTexParameteri(textureType, GL_TEXTURE_WRAP_R, toGLWrapMode(spec.Sampler.WrapModeU));
+            GLCALL(glTexParameteri(textureType, GL_TEXTURE_WRAP_R, toGLWrapMode(spec.Sampler.WrapModeU)));
         }
-        
+
         if (spec.GenerateMipmaps) {
-            glGenerateMipmap(textureType);
+            GLCALL(glGenerateMipmap(textureType));
         }
-        glBindTexture(textureType, 0);
+        GLCALL(glBindTexture(textureType, 0));
 
         return static_cast<ResourceID>(outHandle.Id);
     }
@@ -94,11 +76,11 @@ namespace glass::gfx {
     void destroyTexture(ResourceID id) {
         uint32_t texID = getTextureID(id);
         if (texID != 0) {
-            glDeleteTextures(1, &texID);
+            GLCALL(glDeleteTextures(1, &texID));
         }
     }
 
     uint32_t getOpenGLTextureID(ResourceID texture) {
         return getTextureID(texture);
     }
-}
+} // namespace glass::gfx

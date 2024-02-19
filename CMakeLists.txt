@@ -10,6 +10,7 @@ set(GLASS_CONTEXT_VERSION_MINOR 3)
 option(GLASS_BUILD_TEST "Build test project" OFF)
 option(GLASS_SHARED "" OFF)
 option(GLASS_ENABLE_VERBOSE_OPENGL_LOGGING "" OFF)
+option(GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK "" ON)
 
 file(GLOB_RECURSE 
     PROJECT_FILES 
@@ -37,6 +38,10 @@ target_compile_definitions(glass
 
 if(GLASS_ENABLE_VERBOSE_OPENGL_LOGGING)
     target_compile_definitions(glass PRIVATE GLASS_ENABLE_VERBOSE_OPENGL_LOGGING)
+endif()
+
+if(GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK)
+    target_compile_definitions(glass PRIVATE GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK)
 endif()
 
 # GLFW

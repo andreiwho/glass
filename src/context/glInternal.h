@@ -103,6 +103,19 @@ namespace glass::gfx {
         return 0;
     }
 
+    static constexpr GLenum toGLDataTypeFromFormat(EPixelFormat format) {
+        switch (format) {
+            case EPF_RGB8:
+            case EPF_RGBA8:
+            case EPF_R11G11B10F:
+                return GL_UNSIGNED_BYTE;
+            case EPF_DepthStencil:
+                return GL_UNSIGNED_INT_24_8;
+        }
+
+        return 0;
+    }
+
     static constexpr GLenum toGLFormat(EPixelFormat format) {
         switch (format) {
             case EPF_RGB8:
@@ -113,8 +126,6 @@ namespace glass::gfx {
                 return GL_RGB;
             case EPF_DepthStencil:
                 return GL_DEPTH_STENCIL;
-            default:
-                break;
         }
 
         return 0;
@@ -158,8 +169,31 @@ namespace glass::gfx {
             case ETF_Linear:
                 return GL_LINEAR;
             case ETF_Nearest:
-                return GL_NEAREST;            
+                return GL_NEAREST;
         }
         return 0;
     }
+
+    static void clearErrors() {
+        while (glGetError())
+            ;
+    }
+
+    static void assertError() {
+        GLenum error = glGetError();
+        if (error != 0) {
+#ifdef _MSC_VER
+            __debugbreak();
+#endif
+        }
+    }
+
+#ifndef NDEBUG
+    #define GLCALL(x)  \
+        clearErrors(); \
+        x;             \
+        assertError();
+#else
+    #define GLCALL(x) x
+#endif
 } // namespace glass::gfx

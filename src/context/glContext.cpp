@@ -8,17 +8,21 @@
 #include "glShader.h"
 #include "glFrameBuffer.h"
 
+#ifdef GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK
+    #include "stacktrace"
+#endif
+
 namespace glass::gfx {
     const Context* GCurrentContext = nullptr;
     bool GUsesGFX = false;
 
     static void glDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-        #ifndef GLASS_ENABLE_VERBOSE_OPENGL_LOGGING
+#ifndef GLASS_ENABLE_VERBOSE_OPENGL_LOGGING
         if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
             return;
         }
-        #endif
-        std::string_view messageSource{};        
+#endif
+        std::string_view messageSource{};
         switch (source) {
             case GL_DEBUG_SOURCE_API:
                 messageSource = "API";
@@ -73,7 +77,12 @@ namespace glass::gfx {
                 std::println("GLASS OpenGL debug (Medium, {}, {}): {}", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_HIGH:
+#ifdef GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK
+                std::stacktrace stackTrace = std::stacktrace::current();
+                std::println("GLASS OpenGL debug (High, {}, {}): {}. Callstack:\n{}", messageSource, messageType, message, std::to_string(stackTrace));
+#else
                 std::println("GLASS OpenGL debug (High, {}, {}): {}", messageSource, messageType, message);
+#endif
                 break;
         }
     }
@@ -126,7 +135,6 @@ namespace glass::gfx {
     Context* getCurrentContext() {
         return const_cast<Context*>(GCurrentContext);
     }
-
 
     platform::Window* getContextWindow(const Context* context) {
         return context->getWindow();
