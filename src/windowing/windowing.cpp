@@ -66,7 +66,7 @@ namespace glass::platform {
         if (isFirstFrame) {
             isFirstFrame = false;
         } else {
-            GPlatformInfo->DeltaTime = oldTime - GPlatformInfo->LastTime;
+            GPlatformInfo->DeltaTime = GPlatformInfo->LastTime - oldTime;
         }
 
         glfwPollEvents();
