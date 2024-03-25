@@ -6,7 +6,7 @@
 
 #include "fstream"
 #include "sstream"
-#include "print"
+#include "iostream"
 #include "cassert"
 #include "vector"
 #include "glTexture.h"
@@ -51,7 +51,7 @@ namespace glass::gfx {
             logInfo.resize(len);
             glGetShaderInfoLog(shader, len, &len, logInfo.data());
 
-            std::println("GLASS: Failed to compile shader: {}", logInfo);
+            std::cout << std::format("GLASS: Failed to compile shader: {}", logInfo);
             return nullptr;
         }
 
@@ -94,7 +94,7 @@ namespace glass::gfx {
 
         int32_t location = glGetUniformLocation(m_Id, name);
         if (location == -1) {
-            std::println("GLASS warning: Failed to find uniform location with name: {}", name);
+            std::cout << std::format("GLASS warning: Failed to find uniform location with name: {}", name);
             return location;
         }
 
@@ -115,7 +115,7 @@ namespace glass::gfx {
             m_UniformBlockBindings[hash] = binding;
             return binding;
         } else {
-            std::println("GLASS warning: Failed to find uniform block index with name: {}", name);
+            std::cout << std::format("GLASS warning: Failed to find uniform block index with name: {}", name);
             return -1;
         }
     }
@@ -171,7 +171,7 @@ namespace glass::gfx {
             logInfo.resize(len);
             glGetProgramInfoLog(program, len, &len, logInfo.data());
 
-            std::println("GLASS: Failed to link program: {}", logInfo);
+            std::cout << std::format("GLASS: Failed to link program: {}", logInfo);
             return nullptr;
         }
 
@@ -184,7 +184,7 @@ namespace glass::gfx {
             logInfo.resize(len);
             glGetProgramInfoLog(program, len, &len, logInfo.data());
 
-            std::println("GLASS: Failed to validate program: {}", logInfo);
+            std::cout << std::format("GLASS: Failed to validate program: {}", logInfo);
             return nullptr;
         }
 

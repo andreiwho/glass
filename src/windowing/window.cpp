@@ -1,6 +1,6 @@
 #include "window.h"
 #include "cassert"
-#include "print"
+#include "iostream"
 
 namespace glass::platform {
 
@@ -35,7 +35,7 @@ namespace glass::platform {
         if (!m_Window) {
             const char* error;
             glfwGetError(&error);
-            std::println("GLASS: Failed to create GLFW window: {}", error);
+            std::cerr << "GLASS: Failed to create GLFW window: " << error << std::endl;
             assert(false && "Failed to create window. See error message in log.");
         }
 

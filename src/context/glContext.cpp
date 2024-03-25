@@ -1,7 +1,7 @@
 #include "glad/glad.h"
 
 #include "glContext.h"
-#include "print"
+#include "iostream"
 
 #include "cassert"
 #include "ranges"
@@ -68,20 +68,20 @@ namespace glass::gfx {
 
         switch (severity) {
             case GL_DEBUG_SEVERITY_NOTIFICATION:
-                std::println("GLASS OpenGL debug (Notification, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (Notification, {}, {}): {}", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_LOW:
-                std::println("GLASS OpenGL debug (Low, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (Low, {}, {}): {}", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_MEDIUM:
-                std::println("GLASS OpenGL debug (Medium, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (Medium, {}, {}): {}", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_HIGH:
 #ifdef GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK
                 std::stacktrace stackTrace = std::stacktrace::current();
-                std::println("GLASS OpenGL debug (High, {}, {}): {}. Callstack:\n{}", messageSource, messageType, message, std::to_string(stackTrace));
+                std::cout << std::format("GLASS OpenGL debug (High, {}, {}): {}. Callstack:\n{}", messageSource, messageType, message, std::to_string(stackTrace));
 #else
-                std::println("GLASS OpenGL debug (High, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (High, {}, {}): {}", messageSource, messageType, message);
 #endif
                 break;
         }
@@ -165,7 +165,7 @@ namespace glass::gfx {
 
         if (!GContextData->FunctionsLoaded) {
             if (!gladLoadGL()) {
-                std::println("GLASS: Failed to load OpenGL functions.");
+                std::cout << std::format("GLASS: Failed to load OpenGL functions.");
                 return;
             }
 

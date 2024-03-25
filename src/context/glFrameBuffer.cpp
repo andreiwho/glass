@@ -3,7 +3,7 @@
 #include "glad/glad.h"
 #include "glTexture.h"
 
-#include "print"
+#include "iostream"
 #include "glInternal.h"
 
 namespace glass::gfx {
@@ -82,7 +82,7 @@ namespace glass::gfx {
 
         m_IsValid = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
         if (!m_IsValid) {
-            std::println("GLASS error: Tried to create a framebuffer, but it is not complete. Check if it has at least color or depth attachments.");
+            std::cout << std::format("GLASS error: Tried to create a framebuffer, but it is not complete. Check if it has at least color or depth attachments.");
         }
 
         GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
