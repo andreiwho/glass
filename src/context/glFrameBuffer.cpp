@@ -148,4 +148,41 @@ namespace glass::gfx {
     void resizeFrameBuffer(FrameBuffer* fb, uint32_t width, uint32_t height) {
         fb->resize(width, height);
     }
+
+    void clearFramebufferColorAttachment(FrameBuffer* fb, uint8_t attachmentIndex, glm::vec4 clearColor) {
+        if (!fb)
+            return;
+
+        auto texture = fb->getColorAttachmentTexture(attachmentIndex);
+        switch (getTexturePixelFormat(texture)) {
+            case EPF_RGB8:
+            case EPF_RGBA8:
+            case EPF_R11G11B10F:
+                glClearBufferfv(GL_COLOR, attachmentIndex, glm::value_ptr(clearColor));
+                break;
+            case EPF_RedInteger: {
+                glm::ivec1 clearColorI{ static_cast<int32_t>(clearColor.x) };
+                glClearBufferiv(GL_COLOR, attachmentIndex, &clearColorI.x);
+            } break;
+            default:
+                std::unreachable();
+        }
+    }
+
+    void readFramebufferColorAttachmentPixels(const FrameBuffer* fb, uint8_t attachmentIndex, uint32_t x, uint32_t y, uint32_t width, uint32_t height, void* outData) {
+        const auto texture = getFrameBufferColorAttachmentTexture(fb, attachmentIndex);
+        
+        glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+        const auto format = getTexturePixelFormat(texture);
+        const auto dataType = toGLDataTypeFromFormat(format);
+        const auto glFormat = toGLFormat(format);
+        GLCALL(glReadPixels(
+            static_cast<GLint>(x),
+            static_cast<GLint>(y),
+            static_cast<GLsizei>(width),
+            static_cast<GLsizei>(height),
+            glFormat,
+            dataType,
+            outData));
+    }
 } // namespace glass::gfx

@@ -105,6 +105,8 @@ namespace glass::gfx {
 
     static constexpr GLenum toGLDataTypeFromFormat(EPixelFormat format) {
         switch (format) {
+            case EPF_RedInteger:
+                return GL_INT;
             case EPF_RGB8:
             case EPF_RGBA8:
             case EPF_R11G11B10F:
@@ -126,6 +128,8 @@ namespace glass::gfx {
                 return GL_RGB;
             case EPF_DepthStencil:
                 return GL_DEPTH_STENCIL;
+            case EPF_RedInteger:
+                return GL_RED_INTEGER;
         }
 
         return 0;
@@ -133,6 +137,8 @@ namespace glass::gfx {
 
     static constexpr GLenum toGLInternalFormat(EPixelFormat format) {
         switch (format) {
+            case EPF_RedInteger:
+                return GL_R32I;
             case EPF_RGB8:
                 return GL_RGB;
             case EPF_RGBA8:

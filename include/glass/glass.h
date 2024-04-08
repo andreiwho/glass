@@ -976,6 +976,9 @@ namespace glass {
             /** RGBA 32 bit format */
             EPF_RGBA8,
 
+            /** 32-bit integer format */
+            EPF_RedInteger,
+
             /** RGB 32bit format with HDR support */
             EPF_R11G11B10F,
 
@@ -1102,6 +1105,16 @@ namespace glass {
          * New textures are created then.
          */
         GLASS_API void resizeFrameBuffer(FrameBuffer* fb, uint32_t width, uint32_t height);
+
+        /**
+         * @brief Clear a selected buffer of the framebuffer to the selected color
+         */
+        GLASS_API void clearFramebufferColorAttachment(FrameBuffer* fb, uint8_t attachmentIndex, glm::vec4 clearColor);
+
+        /**
+         * @brief Get pixel color of an framebuffer attachment by x, y, width and height.
+         */
+        GLASS_API void readFramebufferColorAttachmentPixels(const FrameBuffer* fb, uint8_t attachmentIndex, uint32_t x, uint32_t y, uint32_t width, uint32_t height, void* outData);
 
         /**
          * SHADER API
