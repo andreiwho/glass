@@ -68,21 +68,16 @@ namespace glass::gfx {
 
         switch (severity) {
             case GL_DEBUG_SEVERITY_NOTIFICATION:
-                std::cout << std::format("GLASS OpenGL debug (Notification, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (Notification, {}, {}): {}\n", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_LOW:
-                std::cout << std::format("GLASS OpenGL debug (Low, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (Low, {}, {}): {}\n", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_MEDIUM:
-                std::cout << std::format("GLASS OpenGL debug (Medium, {}, {}): {}", messageSource, messageType, message);
+                std::cout << std::format("GLASS OpenGL debug (Medium, {}, {}): {}\n", messageSource, messageType, message);
                 break;
             case GL_DEBUG_SEVERITY_HIGH:
-#ifdef GLASS_ENABLE_HIGH_SEVERITY_CALLSTACK
-                std::stacktrace stackTrace = std::stacktrace::current();
-                std::cout << std::format("GLASS OpenGL debug (High, {}, {}): {}. Callstack:\n{}", messageSource, messageType, message, std::to_string(stackTrace));
-#else
-                std::cout << std::format("GLASS OpenGL debug (High, {}, {}): {}", messageSource, messageType, message);
-#endif
+                std::cout << std::format("GLASS OpenGL debug (High, {}, {}): {}\n", messageSource, messageType, message);
                 break;
         }
     }
