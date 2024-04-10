@@ -1213,7 +1213,7 @@ namespace glass {
          * @param vertexCount number of vertices to draw
          * @param firstVertex the vertex to begin from (offset from the start of the buffer)
          */
-        void draw(EPrimitiveTopology topology, uint32_t vertexCount, uint32_t firstVertex = 0);
+        GLASS_API void draw(EPrimitiveTopology topology, uint32_t vertexCount, uint32_t firstVertex = 0);
 
         /**
          * Draw elements.
@@ -1221,6 +1221,6 @@ namespace glass {
          * @param indexCount number of indices to draw
          * @param indexType type of index.
          */
-        void drawElements(EPrimitiveTopology topology, uint32_t indexCount, EIndexType indexType = EIT_UInt32);
+        GLASS_API void drawElements(EPrimitiveTopology topology, uint32_t indexCount, EIndexType indexType = EIT_UInt32);
     } // namespace gfx
 } // namespace glass
